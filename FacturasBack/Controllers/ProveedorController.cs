@@ -24,6 +24,8 @@ namespace FacturasBack.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<List<ProveedorDTO>>> ListaProveedor()
         {
             List<Proveedor> proveedores = await _proveedorRepository.ObtenerTodos();
@@ -38,12 +40,14 @@ namespace FacturasBack.Controllers
         }
 
         [HttpGet("{id:int}", Name = "ProveedorxId")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ProveedorDTO>> ProveedorxId(int id)
         {
             var proveedor = await _proveedorRepository.ListaFacturasProveedor(id);
             if (proveedor == null)
             {
-                return NotFound("Proveedor no encontrao");
+                return NotFound("Proveedor no encontrado");
             }
 
             var proveedorDTO = _mapper.Map<ProveedorDTO>(proveedor);
@@ -53,9 +57,11 @@ namespace FacturasBack.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<ActionResult> ProveedorNuevo(ProveedorCreacionDTO modeloCreacionDTO)
         {
-            var verificacion = await _proveedorRepository.Verfificacion(p => p.NombreProveedor == modeloCreacionDTO.NombreProveedor );
+            var verificacion = await _proveedorRepository.Verfificacion(p => p.NombreProveedor == modeloCreacionDTO.NombreProveedor);
 
             if (verificacion == null)
             {
@@ -65,18 +71,20 @@ namespace FacturasBack.Controllers
 
                 var modeloDTO = _mapper.Map<ProveedorDTO>(modeloNuevo);
 
-                return CreatedAtRoute("ProveedorxId", new {id = modeloNuevo.Id }, modeloDTO);
+                return CreatedAtRoute("ProveedorxId", new { id = modeloNuevo.Id }, modeloDTO);
             }
 
             return BadRequest($"El proveedor con nombre {modeloCreacionDTO.NombreProveedor} ya existe");
         }
 
         [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> EliminarProveedor(int id)
         {
             var verificacion = _proveedorRepository.ObtenerxId(id);
 
-            if (verificacion !=null)
+            if (verificacion != null)
             {
                 await _proveedorRepository.Eliminar(id);
                 return NoContent();
@@ -86,17 +94,22 @@ namespace FacturasBack.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> ActualizarProveedor(int id, ProveedorActualizacionDTO proveedorDTO)
         {
-            if (proveedorDTO != null || proveedorDTO?.Id != id ) 
+
+
+            if (proveedorDTO != null || proveedorDTO?.Id != id)
             {
                 var nombreExiste = await _proveedorRepository.Verfificacion(p => p.NombreProveedor == proveedorDTO.NombreProveedor);
 
-                if (nombreExiste !=null)
+                if (nombreExiste != null)
                 {
                     return BadRequest($"El nombre de proveedor {proveedorDTO.NombreProveedor} ya se encuntra registrado");
                 }
-                 
+
                 var modelo = _mapper.Map<Proveedor>(proveedorDTO);
 
                 await _proveedorRepository.Actualizar(modelo);
@@ -104,9 +117,10 @@ namespace FacturasBack.Controllers
                 return NoContent();
             }
 
-                return NotFound($"No se encontro el proveedor con id:{id}");
-            }       
+            return NotFound($"No se encontro el proveedor con id:{id}");
+
         }
+    }
         
 
     
