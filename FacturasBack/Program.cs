@@ -32,6 +32,14 @@ namespace FacturasBack
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Conexion"));
             });
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("NuevaPolitica",app =>
+                {
+                    app.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
+            });
+
             builder.Services.AddAutoMapper(typeof(Program));
 
             var app = builder.Build();
@@ -45,9 +53,8 @@ namespace FacturasBack
 
             app.UseHttpsRedirection();
 
+            app.UseCors("NuevaPolitica");
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();
