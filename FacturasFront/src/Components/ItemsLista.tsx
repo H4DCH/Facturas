@@ -1,32 +1,49 @@
-import React  from "react"
-import { IApiResponse } from "../Interface/IApiResponse"
-import { IFactura } from "../Interface/IFactura"
-import { Button, Td, Tr } from "@chakra-ui/react"
+import React, { useState } from "react";
+import { Button, Td, Tr } from "@chakra-ui/react";
+import { HiOutlinePencilSquare } from "react-icons/hi2";
+import { FaTrashCan } from "react-icons/fa6";
+import { IFactura } from "../Interface/IFactura";
+import ModalFactura from "./ModalFactura";
 
-interface Itemsprop{
+const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({
+  facturas,
+}) => {
+  const [open, setOpen] = useState(false);
+  const [facturamodal, setFacturaModal] = useState<IFactura | null>(null);
 
-    response : IApiResponse<IFactura[]>
-}
+  const AbrirModal = (factura: IFactura) => {
+    setFacturaModal(factura);
+    setOpen(true);
+  };
 
+  const CerrarModal = () => {
+    setFacturaModal(null);
+    setOpen(false);
+  };
 
-const ItemsLista :React.FC<Itemsprop> = ({response}) => {
   return (
     <>
-      {response.resultado.map((facturas)=>{
-          return<Tr key={facturas.id}>
-          <Td textAlign={'center'} >{facturas.numeroFactura}</Td>
-          <Td textAlign={'center'}>{facturas.precio}</Td>
-          <Td textAlign={'center'} >{new Date(facturas.fechaFactura).toLocaleDateString()}</Td>
-          <Td textAlign={'center'} >{facturas.proveedorId}</Td>
-          <Td textAlign={'center'} >
-            <Button  colorScheme='teal' size='sm'>Button</Button> 
-            <Button m={2} colorScheme='teal' size='sm'>Button</Button>
+      {facturas?.map((factura) => (
+        <Tr key={factura.id}>
+          <Td textAlign={"center"}>{factura.numeroFactura}</Td>
+          <Td textAlign={"center"}>{factura.precio}</Td>
+          <Td textAlign={"center"}>
+            {new Date(factura.fechaFactura).toLocaleDateString()}
           </Td>
-          </Tr>   
-        })}
-        
+          <Td textAlign={"center"}>{factura.proveedorId}</Td>
+          <Td textAlign={"center"}>
+            <Button m={3} onClick={() => AbrirModal(factura)}><HiOutlinePencilSquare /></Button>
+            <Button><FaTrashCan /></Button>
+          </Td>
+        </Tr>
+      ))}
+      <ModalFactura
+        isOpen={open}
+        onClose={CerrarModal}
+        factura={facturamodal}
+      />
     </>
-  )
-}
+  );
+};
 
-export default ItemsLista
+export default ItemsLista;
