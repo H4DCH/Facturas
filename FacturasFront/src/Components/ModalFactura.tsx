@@ -1,48 +1,68 @@
-import {
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-} from "@chakra-ui/react";
-import React from "react";
-import { IFactura } from "../Interface/IFactura";
+import { Button,Modal,ModalBody,ModalCloseButton,ModalContent,ModalFooter,ModalHeader,ModalOverlay,} from "@chakra-ui/react";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import * as apiFunciones from "../Data/useData"
 
 type propsModal = {
   isOpen: boolean;
   onClose: () => void;
-  factura: IFactura | null;
+  idFactura : number;
 };
 
-const ModalFactura: React.FC<propsModal> = ({ isOpen, onClose, factura }) => {
+const ModalFactura: React.FC<propsModal> = ({ isOpen, onClose, idFactura }) => {
+  const { register, handleSubmit,setValue } = useForm();
+
+  useEffect(()=>{
+    apiFunciones.ObtenerPorId(idFactura)
+    .then((resp) =>{
+      setValue("id",idFactura)
+      setValue("numeroFactura",resp.resultado.numeroFactura)
+      setValue("precio",resp.resultado.precio)
+      setValue("proveedorId",resp.resultado.proveedorId)
+    }).catch((e)=>{
+      console.error(e)
+    })
+  },[])
+  const onSubmit = (data: any) => {
+    console.log(data)
+  };
+
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Editar Factura</ModalHeader>
+          <ModalHeader>Formulario de Ejemplo</ModalHeader>
           <ModalCloseButton />
-          <ModalBody pb={6}>
-            <FormControl>
-              <FormLabel>First name</FormLabel>
-              <Input placeholder="First name" value={factura?.numeroFactura} />
-            </FormControl>
-            <FormControl mt={4}>
-              <FormLabel>Last name</FormLabel>
-              <Input placeholder="Last name" />
-            </FormControl>
+          <ModalBody>
+            <form onSubmit={handleSubmit(onSubmit)}>
+            <input
+                type="hidden"
+                {...register("id")}
+              />
+              <input
+                type="number"
+                placeholder="Ingrese la factura"
+                {...register("numeroFactura")}
+              />
+              <input
+                type="number"
+                placeholder="Precio de  Factura"
+                {...register("precio")}
+              />
+              <input
+                type="number"
+                placeholder="Proveedor"
+                {...register("proveedorId")}
+              />
+              <button type="submit">Modificar</button>
+            </form>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={3}>
-              Save
+           
+            <Button onClick={onClose} ml={3}>
+              Cancelar
             </Button>
-            <Button onClick={onClose}>Cancel</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

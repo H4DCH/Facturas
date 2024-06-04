@@ -9,15 +9,14 @@ const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({
   facturas,
 }) => {
   const [open, setOpen] = useState(false);
-  const [facturamodal, setFacturaModal] = useState<IFactura | null>(null);
+  const [facturaModal, setFacturaModal] = useState<number>(0);
 
-  const AbrirModal = (factura: IFactura) => {
-    setFacturaModal(factura);
+  const AbrirModal = (idFactura: number) => {
+    setFacturaModal(idFactura);
     setOpen(true);
   };
 
   const CerrarModal = () => {
-    setFacturaModal(null);
     setOpen(false);
   };
 
@@ -32,16 +31,22 @@ const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({
           </Td>
           <Td textAlign={"center"}>{factura.proveedorId}</Td>
           <Td textAlign={"center"}>
-            <Button m={3} onClick={() => AbrirModal(factura)}><HiOutlinePencilSquare /></Button>
-            <Button><FaTrashCan /></Button>
+            <Button m={3} onClick={() => AbrirModal(factura.id)}>
+              <HiOutlinePencilSquare />
+            </Button>
+            <Button>
+              <FaTrashCan />
+            </Button>
           </Td>
         </Tr>
       ))}
-      <ModalFactura
-        isOpen={open}
-        onClose={CerrarModal}
-        factura={facturamodal}
-      />
+      {facturaModal !== 0 && (
+        <ModalFactura
+          isOpen={open}
+          onClose={CerrarModal}
+          idFactura={facturaModal}
+        />
+      )}
     </>
   );
 };

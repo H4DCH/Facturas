@@ -17,7 +17,7 @@ const Lista = () => {
   const [factura, setFactura] = useState<IFactura[] | null>(null);
 
   useEffect(() => {
-    ApiFunciones.ObtenerFacturas("factura")
+    ApiFunciones.ObtenerFacturas()
       .then((resp) => {
         setFactura(resp.resultado);
       })
