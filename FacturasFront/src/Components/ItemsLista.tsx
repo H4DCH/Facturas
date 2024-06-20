@@ -1,24 +1,30 @@
-import React, { useState } from "react";
-import { Button, Td, Tr } from "@chakra-ui/react";
+import React, {useState } from "react";
+import { Button, Td, Tr, useDisclosure } from "@chakra-ui/react";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
 import { FaTrashCan } from "react-icons/fa6";
 import { IFactura } from "../Interface/IFactura";
 import ModalFactura from "./ModalFactura";
+import * as ApiFunciones from "../Data/useData"
 
 const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({
   facturas,
 }) => {
-  const [open, setOpen] = useState(false);
-  const [facturaModal, setFacturaModal] = useState<number>(0);
+  const [datosFactura, setDatosFactura] = useState<IFactura | null>(null);
 
-  const AbrirModal = (idFactura: number) => {
-    setFacturaModal(idFactura);
-    setOpen(true);
+  const handleEditar = (factura: IFactura) => {
+    setDatosFactura(factura);
+    onOpen();
   };
 
-  const CerrarModal = () => {
-    setOpen(false);
-  };
+  const handleEliminar = async(id:number)=>{
+    try {
+      await ApiFunciones.EliminarFactura(id);
+      
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  const {onOpen,isOpen,onClose} = useDisclosure();
 
   return (
     <>
@@ -31,22 +37,16 @@ const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({
           </Td>
           <Td textAlign={"center"}>{factura.proveedorId}</Td>
           <Td textAlign={"center"}>
-            <Button m={3} onClick={() => AbrirModal(factura.id)}>
+            <Button m={3} onClick={() => handleEditar(factura)}>
               <HiOutlinePencilSquare />
             </Button>
-            <Button>
+            <Button onClick={()=>handleEliminar(factura.id)}>
               <FaTrashCan />
             </Button>
           </Td>
         </Tr>
       ))}
-      {facturaModal !== 0 && (
-        <ModalFactura
-          isOpen={open}
-          onClose={CerrarModal}
-          idFactura={facturaModal}
-        />
-      )}
+      {datosFactura && <ModalFactura factura={datosFactura} onOpen={onOpen} isOpen={isOpen} onClose={onClose} />}
     </>
   );
 };

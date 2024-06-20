@@ -24,7 +24,7 @@ const Lista = () => {
       .catch((e) => {
         console.error(e);
       });
-  }, []);
+  }, [factura]);
 
   return (
     <>

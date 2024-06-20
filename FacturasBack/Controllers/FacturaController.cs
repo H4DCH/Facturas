@@ -166,7 +166,7 @@ namespace FacturasBack.Controllers
         }
 
 
-        [HttpPut("id:int")]
+        [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
