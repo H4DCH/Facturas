@@ -1,14 +1,15 @@
-import React, {useState } from "react";
+import React, { useState } from "react";
 import { Button, Td, Tr, useDisclosure } from "@chakra-ui/react";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
 import { FaTrashCan } from "react-icons/fa6";
 import { IFactura } from "../Interface/IFactura";
 import ModalFactura from "./ModalFactura";
-import * as ApiFunciones from "../Data/useData"
+import * as ApiFunciones from "../Data/useData";
 
 const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({
   facturas,
 }) => {
+
   const [datosFactura, setDatosFactura] = useState<IFactura | null>(null);
 
   const handleEditar = (factura: IFactura) => {
@@ -16,15 +17,14 @@ const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({
     onOpen();
   };
 
-  const handleEliminar = async(id:number)=>{
+  const handleEliminar = async (id: number) => {
     try {
       await ApiFunciones.EliminarFactura(id);
-      
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
-  const {onOpen,isOpen,onClose} = useDisclosure();
+  };
+  const { onOpen, isOpen, onClose } = useDisclosure();
 
   return (
     <>
@@ -39,14 +39,21 @@ const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({
           <Td textAlign={"center"}>
             <Button m={3} onClick={() => handleEditar(factura)}>
               <HiOutlinePencilSquare />
-            </Button>
-            <Button onClick={()=>handleEliminar(factura.id)}>
-              <FaTrashCan />
+            </Button>    
+            <Button onClick={() => handleEliminar(factura.id)}>
+               <FaTrashCan />
             </Button>
           </Td>
         </Tr>
       ))}
-      {datosFactura && <ModalFactura factura={datosFactura} onOpen={onOpen} isOpen={isOpen} onClose={onClose} />}
+      {datosFactura && (
+        <ModalFactura
+          factura={datosFactura}
+          onOpen={onOpen}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      )}
     </>
   );
 };

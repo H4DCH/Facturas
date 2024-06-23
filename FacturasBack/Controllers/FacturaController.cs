@@ -174,7 +174,7 @@ namespace FacturasBack.Controllers
         public async Task<ActionResult<ApiResponse>> EditarFactura(int id, FacturaActualizacionDTO facturaDTO)
         {
             try
-            {   if (id == 0)
+            {   if (id != 0)
                 {
                     if (facturaDTO == null)
                     {

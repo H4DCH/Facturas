@@ -3,6 +3,7 @@ import * as ApiFunciones from "../Data/useData";
 import ItemsLista from "./ItemsLista";
 import {
   Box,
+  Button,
   Table,
   TableContainer,
   Tbody,
@@ -10,11 +11,18 @@ import {
   Th,
   Thead,
   Tr,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { IFactura } from "../Interface/IFactura";
+import ModalFactura from "./ModalFactura";
 
 const Lista = () => {
   const [factura, setFactura] = useState<IFactura[] | null>(null);
+  const {onOpen,isOpen,onClose} = useDisclosure();
+
+  const AbrirModal =()=>{
+    onOpen();
+  }
 
   useEffect(() => {
     ApiFunciones.ObtenerFacturas()
@@ -28,8 +36,12 @@ const Lista = () => {
 
   return (
     <>
-      <Box w={1000} mt={100} ml={190}>
+      <Box w={1000} mt={100} ml={220}>
         <TableContainer>
+        <>
+        <Button onClick={AbrirModal}>Nueva Factura</Button>
+        <ModalFactura factura={null} isOpen={isOpen} onClose={onClose} onOpen={onOpen} />
+        </>
           <Table variant="striped" colorScheme="teal">
             <Thead>
               <Tr>
@@ -43,7 +55,10 @@ const Lista = () => {
             <Tbody>
               {!factura ? (
                 <Tr>
-                  <Td colSpan={5} textAlign={'center'} fontSize={25}>Sin datos</Td></Tr>
+                  <Td colSpan={5} textAlign={"center"} fontSize={25}>
+                    Sin datos
+                  </Td>
+                </Tr>
               ) : (
                 <ItemsLista facturas={factura} />
               )}
