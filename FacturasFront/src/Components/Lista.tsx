@@ -15,7 +15,6 @@ import {
 } from "@chakra-ui/react";
 import { IFactura } from "../Interface/IFactura";
 import ModalFactura from "./ModalFactura";
-
 const Lista = () => {
   const [factura, setFactura] = useState<IFactura[] | null>(null);
   const {onOpen,isOpen,onClose} = useDisclosure();
@@ -36,7 +35,7 @@ const Lista = () => {
 
   return (
     <>
-      <Box w={1000} mt={100} ml={220}>
+      <Box w={1000} mt={100} ml={220} display={"flex"} >
         <TableContainer>
         <>
         <Button onClick={AbrirModal}>Nueva Factura</Button>

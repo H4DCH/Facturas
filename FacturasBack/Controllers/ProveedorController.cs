@@ -8,6 +8,7 @@ using FacturasBack.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Net;
 
 namespace FacturasBack.Controllers
 {
@@ -17,111 +18,221 @@ namespace FacturasBack.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IProveedorRepository _proveedorRepository;
+        private readonly ApiResponse response;
         public ProveedorController(IProveedorRepository proveedorRepository, IMapper mapper)
         {
             _proveedorRepository = proveedorRepository;
             _mapper = mapper;
+            response = new();
         }
+
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<List<ProveedorDTO>>> ListaProveedor()
+        public async Task<ActionResult<ApiResponse>> ListaProveedor()
         {
-            List<Proveedor> proveedores = await _proveedorRepository.ObtenerTodos();
-
-            if (proveedores == null)
+            try
             {
-                return NotFound();
-            }
-            List<ProveedorDTO> proveedoresDTO = _mapper.Map<List<ProveedorDTO>>(proveedores);
+                List<Proveedor> proveedores = await _proveedorRepository.ObtenerTodos();
+                if (proveedores == null)
+                {
+                    response.EsExitoso = false;
+                    response.Resultado = HttpStatusCode.NotFound;
+                    response.ErrorMessages = new List<string>() {
+                        "Facturas no encontradas."
+                    };
+                    return response;
+                }
+                response.Resultado = _mapper.Map<List<ProveedorDTO>>(proveedores);
+                response.StatusCode = HttpStatusCode.OK;
 
-            return Ok(proveedoresDTO);
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                response.EsExitoso = false;
+                response.ErrorMessages = new List<string>()
+                {
+                    ex.ToString()
+                };
+            }
+            return response;
+
         }
+
 
         [HttpGet("{id:int}", Name = "ProveedorxId")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ProveedorDTO>> ProveedorxId(int id)
+        public async Task<ActionResult<ApiResponse>> ProveedorxId(int id)
         {
-            var proveedor = await _proveedorRepository.ListaFacturasProveedor(id);
-            if (proveedor == null)
+            try
             {
-                return NotFound("Proveedor no encontrado");
+                var proveedor = await _proveedorRepository.ListaFacturasProveedor(id);
+                if (proveedor == null)
+                {
+                    response.EsExitoso = false;
+                    response.Resultado = HttpStatusCode.NotFound;
+                    response.ErrorMessages = new List<string>()
+                    {
+                        "Proveedor no encontrado"
+                    };
+                    return response;
+                }
+
+                response.Resultado = _mapper.Map<ProveedorDTO>(proveedor);
+                response.StatusCode = HttpStatusCode.OK;
+
+                return response;
+
             }
+            catch (Exception ex)
+            {
+                response.EsExitoso = false;
+                response.ErrorMessages = new List<string>()
+                {
+                    ex.ToString()
+                };
 
-            var proveedorDTO = _mapper.Map<ProveedorDTO>(proveedor);
-
-            return Ok(proveedorDTO);
-
+            }
+            return response;
         }
+
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<ActionResult> ProveedorNuevo(ProveedorCreacionDTO modeloCreacionDTO)
+        public async Task<ActionResult<ApiResponse>> ProveedorNuevo(ProveedorCreacionDTO modeloCreacionDTO)
         {
-            var verificacion = await _proveedorRepository.Verfificacion(p => p.NombreProveedor == modeloCreacionDTO.NombreProveedor);
-
-            if (verificacion == null)
+            try
             {
-                var modeloNuevo = _mapper.Map<Proveedor>(modeloCreacionDTO);
+                var verificacion = await _proveedorRepository.Verfificacion(p => p.NombreProveedor == modeloCreacionDTO.NombreProveedor);
 
-                await _proveedorRepository.Crear(modeloNuevo);
+                if (verificacion == null)
+                {
+                    var modeloNuevo = _mapper.Map<Proveedor>(modeloCreacionDTO);
+                    await _proveedorRepository.Crear(modeloNuevo);
 
-                var modeloDTO = _mapper.Map<ProveedorDTO>(modeloNuevo);
+                    response.Resultado = _mapper.Map<ProveedorDTO>(modeloNuevo);
+                    response.StatusCode = HttpStatusCode.OK;
 
-                return CreatedAtRoute("ProveedorxId", new { id = modeloNuevo.Id }, modeloDTO);
+                    return CreatedAtRoute("ProveedorxId", new { id = modeloNuevo.Id }, response.Resultado);
+                }
+
+                response.EsExitoso = false;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.ErrorMessages = new List<string>()
+                {
+                    $"El proveedor con nombre {modeloCreacionDTO.NombreProveedor} ya existe"
+                };
+
+                return response;
+
             }
-
-            return BadRequest($"El proveedor con nombre {modeloCreacionDTO.NombreProveedor} ya existe");
+            catch (Exception ex)
+            {
+                response.EsExitoso = false;
+                response.ErrorMessages = new List<string>()
+                {
+                    ex.ToString()
+                };
+            }
+            return response;
         }
+
 
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> EliminarProveedor(int id)
+        public async Task<ActionResult<ApiResponse>> EliminarProveedor(int id)
         {
-            var verificacion = _proveedorRepository.ObtenerxId(id);
-
-            if (verificacion != null)
+            try
             {
-                await _proveedorRepository.Eliminar(id);
-                return NoContent();
-            }
-            return NotFound($"El proveedor con id {id} no existe");
+                var verificacion = _proveedorRepository.ObtenerxId(id);
 
+                if (verificacion != null)
+                {
+                    await _proveedorRepository.Eliminar(id);
+                    response.StatusCode = HttpStatusCode.NoContent;
+                    return response;
+                }
+                response.EsExitoso = false;
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.ErrorMessages = new List<string>()
+                {
+                    $"El proveedor con id {id} no existe"
+                };
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                response.EsExitoso = false;
+                response.ErrorMessages = new List<string>()
+                {
+                    ex.ToString()
+                };
+            }
+            return response;
         }
+
+
+
 
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> ActualizarProveedor(int id, ProveedorActualizacionDTO proveedorDTO)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<ActionResult<ApiResponse>> ActualizarProveedor(int id, ProveedorActualizacionDTO proveedorDTO)
         {
-
-
-            if (proveedorDTO != null || proveedorDTO?.Id != id)
+            try
             {
-                var nombreExiste = await _proveedorRepository.Verfificacion(p => p.NombreProveedor == proveedorDTO.NombreProveedor);
 
-                if (nombreExiste != null)
+                if (proveedorDTO != null || proveedorDTO?.Id != id)
                 {
-                    return BadRequest($"El nombre de proveedor {proveedorDTO.NombreProveedor} ya se encuntra registrado");
+                    var nombreExiste = await _proveedorRepository.Verfificacion(p => p.NombreProveedor == proveedorDTO.NombreProveedor);
+
+                    if (nombreExiste != null)
+                    {
+                        response.EsExitoso = false;
+                        response.StatusCode = HttpStatusCode.BadRequest;
+                        response.ErrorMessages = new List<string>()
+                        {
+                            $"El nombre de proveedor {proveedorDTO.NombreProveedor} ya se encuntra registrado"
+                        };
+                        return response;
+                    }
+
+                    var modelo = _mapper.Map<Proveedor>(proveedorDTO);
+
+                    await _proveedorRepository.Actualizar(modelo);
+                    response.Resultado = modelo;
+                    response.StatusCode = HttpStatusCode.Created;
+
+                    return CreatedAtRoute("ProveedorxId", new { id = proveedorDTO.Id }, response.Resultado);
                 }
+                response.EsExitoso = false;
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.ErrorMessages = new List<string>()
+                {
+                    $"No se encontro el proveedor con id:{id}"
+                };
 
-                var modelo = _mapper.Map<Proveedor>(proveedorDTO);
-
-                await _proveedorRepository.Actualizar(modelo);
-
-                return NoContent();
+                return response;
             }
-
-            return NotFound($"No se encontro el proveedor con id:{id}");
+            catch (Exception ex)
+            {
+                response.EsExitoso = false;
+                response.ErrorMessages = new List<string>()
+                {
+                    ex.ToString()
+                };
+            }
+            return response;
 
         }
     }
-        
-
-    
 }

@@ -13,6 +13,7 @@ import * as apiFunciones from "../Data/useData";
 import { useEffect, useState } from "react";
 import { IProveedor } from "../Interface/IProveedor";
 import * as apiFuncionesProv from "../Data/useProveedor"
+import Swal from "sweetalert2";
 
 type propsModal = {
   factura: IFactura | null;
@@ -29,24 +30,25 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
-  } = useForm<IFactura>({
-    defaultValues: {
-      id: factura?.id,
-      numeroFactura: factura?.numeroFactura,
-      precio: factura?.precio,
-      fechaFactura: fechaFormateda,
-    },
-  });
+  } = useForm<IFactura>();
+
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       if (data && data.id) {
         await apiFunciones.ActualizarFactura(data.id, data);
+        reset();
         onClose();
       }
       else {
         await apiFunciones.CrearFactura(data)
+        Swal.fire({
+          title: "Factura Creada",
+          icon: "success"
+        });
+        reset();
         onClose()
       }
     } catch (error) {
@@ -54,12 +56,17 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
     }
   });
 
+  const handleClose =()=>{
+    reset();
+    onClose();
+  }
+
  const [proveedores , setProveedor] = useState<IProveedor[]>();
 
   useEffect(()=>{
     apiFuncionesProv.ListaProveedores()
     .then((resp)=>{
-      setProveedor(resp)
+      setProveedor(resp.resultado)
     })
   },[])
 
@@ -77,11 +84,10 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
           </ModalHeader>
           <ModalBody>
             <form onSubmit={onSubmit}>
-              <input type="hidden" {...register("id")} />
-
+              <input defaultValue={factura?.id} type="hidden" {...register("id")} />
               <label>
                 Número de factura
-                <input
+                <input defaultValue={factura?.numeroFactura}
                   {...register("numeroFactura", {
                     required: {
                       value: true,
@@ -104,7 +110,7 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
 
               <label>
                 Precio de factura
-                <input
+                <input defaultValue={factura?.precio}
                   {...register("precio", {
                     required: {
                       value: true,
@@ -125,7 +131,7 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
 
               <label>
                 Fecha de Factura
-                <input
+                <input defaultValue={fechaFormateda}
                   {...register("fechaFactura", {
                     required: {
                       value: true,
@@ -150,7 +156,7 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
               </label>
               <label>
                 Proveedor
-                <select {...register("proveedorId")} value={factura?.proveedorId}>
+                <select {...register("proveedorId") } defaultValue={factura?.proveedorId}>
                     {proveedores?.map((prov)=>(
                       <option key={prov.id} value={prov.id}>{prov.nombreProveedor}</option>
                     ))}
@@ -162,7 +168,7 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
             <button className="buttonForm" type="submit" onClick={onSubmit}>
               {factura && factura.numeroFactura ? "EDITAR" : "CREAR"}
             </button>
-            <button className="buttonForm" type="button" onClick={onClose}>
+            <button className="buttonForm" type="button" onClick={handleClose}>
               CANCELAR
             </button>
           </ModalFooter>

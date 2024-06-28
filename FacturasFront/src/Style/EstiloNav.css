@@ -1,0 +1,6 @@
+.nav-pricipal{
+display: flex; 
+  justify-content:left; 
+  background-color: #abf9ff; /* Color de fondo */
+  padding: 10px; 
+}

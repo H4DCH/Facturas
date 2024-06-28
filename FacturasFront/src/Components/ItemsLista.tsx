@@ -5,10 +5,9 @@ import { FaTrashCan } from "react-icons/fa6";
 import { IFactura } from "../Interface/IFactura";
 import ModalFactura from "./ModalFactura";
 import * as ApiFunciones from "../Data/useData";
+import Swal from "sweetalert2";
 
-const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({
-  facturas,
-}) => {
+const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({facturas}) => {
 
   const [datosFactura, setDatosFactura] = useState<IFactura | null>(null);
 
@@ -19,7 +18,16 @@ const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({
 
   const handleEliminar = async (id: number) => {
     try {
-      await ApiFunciones.EliminarFactura(id);
+      Swal.fire({
+        title: "Esta seguro de eliminar esta factura?",
+        showCancelButton: true,
+        confirmButtonText: "Eliminar"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire("Eliminado Correctamente", "", "success");
+           ApiFunciones.EliminarFactura(id);
+        }
+      });
     } catch (error) {
       console.error(error);
     }
@@ -28,6 +36,15 @@ const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({
 
   return (
     <>
+    
+    {facturas && (
+        <ModalFactura
+          factura={datosFactura}
+          onOpen={onOpen}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      )}
       {facturas?.map((factura) => (
         <Tr key={factura.id}>
           <Td textAlign={"center"}>{factura.numeroFactura}</Td>
@@ -38,22 +55,14 @@ const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({
           <Td textAlign={"center"}>{factura.proveedorId}</Td>
           <Td textAlign={"center"}>
             <Button m={3} onClick={() => handleEditar(factura)}>
-              <HiOutlinePencilSquare />
+              <HiOutlinePencilSquare /> Editar
             </Button>    
             <Button onClick={() => handleEliminar(factura.id)}>
-               <FaTrashCan />
+               <FaTrashCan />Eliminar
             </Button>
           </Td>
         </Tr>
       ))}
-      {datosFactura && (
-        <ModalFactura
-          factura={datosFactura}
-          onOpen={onOpen}
-          isOpen={isOpen}
-          onClose={onClose}
-        />
-      )}
     </>
   );
 };
