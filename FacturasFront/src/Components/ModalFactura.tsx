@@ -23,6 +23,7 @@ type propsModal = {
 };
 
 const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
+
   const fechaFormateda = factura?.fechaFactura
     ? new Date(factura.fechaFactura).toISOString().substr(0, 10)
     : undefined;
@@ -39,6 +40,10 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
     try {
       if (data && data.id) {
         await apiFunciones.ActualizarFactura(data.id, data);
+        Swal.fire({
+          title: "Factura Actualizada",
+          icon: "success"
+        });
         reset();
         onClose();
       }

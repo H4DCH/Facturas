@@ -1,4 +1,5 @@
 ﻿using FacturasBack.Models;
+using FacturasBack.Models.DTO;
 
 namespace FacturasBack.Repository.IRepository
 {

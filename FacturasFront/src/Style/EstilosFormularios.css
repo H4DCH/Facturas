@@ -17,6 +17,7 @@ input,label,select{
     width: 100%;
     padding: 8px;
     margin-bottom: 8px;
+    margin-top: 10px;
 }
 .buttonForm{
     padding: 5px;
@@ -36,4 +37,8 @@ label{
 input,select{
     border-radius: 10px;
     box-shadow: 0 0 10px black;
+}
+
+.formProveedor {
+    height: 150px;
 }

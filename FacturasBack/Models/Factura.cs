@@ -15,7 +15,7 @@ namespace FacturasBack.Models
         public DateTime FechaActualizacion { get; set; }
 
         //Llave Fornea 
-        public int ProveedorId { get; set; }
+        public int ProveedorId { get; set; }    
         //Propiedad de navegacion
         public Proveedor Proveedor { get; set; }    
 

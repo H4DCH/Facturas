@@ -25,7 +25,6 @@ export async function ObtenerFacturas() {
     });
     if (response.ok) {
       const respuesta = await response.json();
-      console.log(respuesta);
       return respuesta;
     }
     throw new Error('Error al eliminar la factura');

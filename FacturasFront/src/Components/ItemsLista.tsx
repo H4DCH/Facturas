@@ -1,25 +1,28 @@
-import React, { useState } from "react";
-import { Button, Td, Tr, useDisclosure } from "@chakra-ui/react";
+import React from "react";
+import { Button, Td, Tr } from "@chakra-ui/react";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
 import { FaTrashCan } from "react-icons/fa6";
 import { IFactura } from "../Interface/IFactura";
-import ModalFactura from "./ModalFactura";
 import * as ApiFunciones from "../Data/useData";
 import Swal from "sweetalert2";
 
-const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({facturas}) => {
+type propsModal ={
+  factura:IFactura | null;
+  clickEditar:(factura:IFactura|null)=>void;
+}
 
-  const [datosFactura, setDatosFactura] = useState<IFactura | null>(null);
+const ItemsLista: React.FC<propsModal> = ({factura,clickEditar}) => {
 
-  const handleEditar = (factura: IFactura) => {
-    setDatosFactura(factura);
-    onOpen();
+
+  const handleEditar = () => {
+    clickEditar(factura);
   };
 
   const handleEliminar = async (id: number) => {
     try {
       Swal.fire({
         title: "Esta seguro de eliminar esta factura?",
+        icon: "question",
         showCancelButton: true,
         confirmButtonText: "Eliminar"
       }).then((result) => {
@@ -32,37 +35,27 @@ const ItemsLista: React.FC<{ facturas: IFactura[] | null }> = ({facturas}) => {
       console.error(error);
     }
   };
-  const { onOpen, isOpen, onClose } = useDisclosure();
-
   return (
     <>
-    
-    {facturas && (
-        <ModalFactura
-          factura={datosFactura}
-          onOpen={onOpen}
-          isOpen={isOpen}
-          onClose={onClose}
-        />
-      )}
-      {facturas?.map((factura) => (
-        <Tr key={factura.id}>
-          <Td textAlign={"center"}>{factura.numeroFactura}</Td>
-          <Td textAlign={"center"}>{factura.precio}</Td>
-          <Td textAlign={"center"}>
-            {new Date(factura.fechaFactura).toLocaleDateString()}
-          </Td>
-          <Td textAlign={"center"}>{factura.proveedorId}</Td>
-          <Td textAlign={"center"}>
-            <Button m={3} onClick={() => handleEditar(factura)}>
-              <HiOutlinePencilSquare /> Editar
-            </Button>    
-            <Button onClick={() => handleEliminar(factura.id)}>
-               <FaTrashCan />Eliminar
-            </Button>
-          </Td>
-        </Tr>
-      ))}
+      <Tr>
+        <Td textAlign={"center"}>{factura?.numeroFactura}</Td>
+        <Td textAlign={"center"}>${factura?.precio}</Td>
+        <Td textAlign={"center"}>
+          {factura && factura.fechaFactura && (
+            <>{new Date(factura.fechaFactura).toLocaleDateString()}</>
+          )}
+        </Td>
+        <Td textAlign={"center"}>{factura?.proveedorId}</Td>
+        <Td textAlign={"center"}>
+          <Button m={3} onClick={()=>handleEditar()}>
+            <HiOutlinePencilSquare /> Editar
+          </Button>
+          <Button onClick={() =>factura && handleEliminar(factura.id)}>
+            <FaTrashCan />
+            Eliminar
+          </Button>
+        </Td>
+      </Tr>
     </>
   );
 };

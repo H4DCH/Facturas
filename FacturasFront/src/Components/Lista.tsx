@@ -17,10 +17,12 @@ import { IFactura } from "../Interface/IFactura";
 import ModalFactura from "./ModalFactura";
 const Lista = () => {
   const [factura, setFactura] = useState<IFactura[] | null>(null);
+  const [editFactura,seteditFactura] = useState<IFactura | null>(null);
   const {onOpen,isOpen,onClose} = useDisclosure();
 
-  const AbrirModal =()=>{
-    onOpen();
+  const handleModal =(fact:IFactura|null)=>{
+      seteditFactura(fact)
+      onOpen();
   }
 
   useEffect(() => {
@@ -38,10 +40,9 @@ const Lista = () => {
       <Box w={1000} mt={100} ml={220} display={"flex"} >
         <TableContainer>
         <>
-        <Button onClick={AbrirModal}>Nueva Factura</Button>
-        <ModalFactura factura={null} isOpen={isOpen} onClose={onClose} onOpen={onOpen} />
+        <Button onClick={()=>handleModal(null)} >Nueva Factura</Button>
         </>
-          <Table variant="striped" colorScheme="teal">
+          <Table variant="striped" colorScheme="teal" size="sm" >
             <Thead>
               <Tr>
                 <Th textAlign={"center"}>Numero de Factura</Th>
@@ -59,12 +60,15 @@ const Lista = () => {
                   </Td>
                 </Tr>
               ) : (
-                <ItemsLista facturas={factura} />
+                factura.map((fact)=>(
+                  <ItemsLista key={fact.id} factura={fact} clickEditar={handleModal} />
+                ))
               )}
             </Tbody>
           </Table>
         </TableContainer>
       </Box>
+      <ModalFactura factura={editFactura} onClose={onClose} onOpen={onOpen} isOpen={isOpen} />
     </>
   );
 };

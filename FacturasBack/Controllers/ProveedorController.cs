@@ -118,7 +118,7 @@ namespace FacturasBack.Controllers
                     response.Resultado = _mapper.Map<ProveedorDTO>(modeloNuevo);
                     response.StatusCode = HttpStatusCode.OK;
 
-                    return CreatedAtRoute("ProveedorxId", new { id = modeloNuevo.Id }, response.Resultado);
+                    return CreatedAtRoute("ProveedorxId", new { id = modeloNuevo.Id }, response);
                 }
 
                 response.EsExitoso = false;
@@ -201,7 +201,7 @@ namespace FacturasBack.Controllers
                         response.StatusCode = HttpStatusCode.BadRequest;
                         response.ErrorMessages = new List<string>()
                         {
-                            $"El nombre de proveedor {proveedorDTO.NombreProveedor} ya se encuntra registrado"
+                            $"El nombre {proveedorDTO.NombreProveedor} ya se encuntra registrado"
                         };
                         return response;
                     }
@@ -212,7 +212,7 @@ namespace FacturasBack.Controllers
                     response.Resultado = modelo;
                     response.StatusCode = HttpStatusCode.Created;
 
-                    return CreatedAtRoute("ProveedorxId", new { id = proveedorDTO.Id }, response.Resultado);
+                    return CreatedAtRoute("ProveedorxId", new { id = proveedorDTO.Id }, response);
                 }
                 response.EsExitoso = false;
                 response.StatusCode = HttpStatusCode.NotFound;

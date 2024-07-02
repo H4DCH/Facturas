@@ -1,5 +1,6 @@
 ﻿using FacturasBack.Data;
 using FacturasBack.Models;
+using FacturasBack.Models.DTO;
 using FacturasBack.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 
