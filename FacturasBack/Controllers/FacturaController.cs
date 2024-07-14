@@ -3,6 +3,8 @@ using Azure;
 using FacturasBack.Models;
 using FacturasBack.Models.DTO;
 using FacturasBack.Repository.IRepository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
@@ -51,6 +53,7 @@ namespace FacturasBack.Controllers
         [HttpGet("{id:int}", Name = "FacturaxId")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<ApiResponse>> FacturaxId(int id)
         {
             try

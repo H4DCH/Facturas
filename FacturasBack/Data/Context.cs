@@ -11,5 +11,6 @@ namespace FacturasBack.Data
         }
         public DbSet<Factura> Facturas { get; set; }
         public DbSet<Proveedor> Proveedores { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }    
     }
 }

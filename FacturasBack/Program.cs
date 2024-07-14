@@ -1,9 +1,13 @@
 
+using FacturasBack.Customs;
 using FacturasBack.Data;
 using FacturasBack.Models;
 using FacturasBack.Repository;
 using FacturasBack.Repository.IRepository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace FacturasBack
@@ -26,8 +30,9 @@ namespace FacturasBack
 
             builder.Services.AddScoped<IFacturaRepository,FacturaRepository>();
             builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
+            builder.Services.AddSingleton<Utilidades>();
 
-
+            
             builder.Services.AddDbContext<Context>(options => {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Conexion"));
             });
@@ -38,6 +43,25 @@ namespace FacturasBack
                 {
                     app.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
                 });
+            });
+            builder.Services.AddAuthentication(config =>
+            {
+                config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(config =>
+            {
+                config.RequireHttpsMetadata = false;
+                config.SaveToken = true;
+                config.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
+                    IssuerSigningKey = new SymmetricSecurityKey
+                    (Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]!))
+                };
             });
 
             builder.Services.AddAutoMapper(typeof(Program));
@@ -50,6 +74,8 @@ namespace FacturasBack
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseAuthentication();
 
             app.UseHttpsRedirection();
 

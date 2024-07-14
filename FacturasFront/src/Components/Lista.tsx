@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import * as ApiFunciones from "../Data/useData";
+import * as funciones from "../Data/useUsuario";
 import ItemsLista from "./ItemsLista";
 import {
   Box,
@@ -15,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { IFactura } from "../Interface/IFactura";
 import ModalFactura from "./ModalFactura";
+import { ILogin } from "../Interface/ILogin";
 const Lista = () => {
   const [factura, setFactura] = useState<IFactura[] | null>(null);
   const [editFactura,seteditFactura] = useState<IFactura | null>(null);
@@ -24,6 +26,7 @@ const Lista = () => {
       seteditFactura(fact)
       onOpen();
   }
+
 
   useEffect(() => {
     ApiFunciones.ObtenerFacturas()

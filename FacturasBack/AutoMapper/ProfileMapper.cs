@@ -21,6 +21,11 @@ namespace FacturasBack.AutoMapper
             CreateMap<Proveedor, ProveedorCreacionDTO>().ReverseMap();
             #endregion
 
+            #region Usuario
+            CreateMap<Usuario, UsuarioDTO>().ReverseMap();
+            #endregion
+
+
         }
     }
 }
