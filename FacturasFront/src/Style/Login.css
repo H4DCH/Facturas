@@ -1,0 +1,31 @@
+
+.ContenedorPrincipal {
+    background: rgb(172, 172, 172);
+    display: flex;
+    width: 450px;
+    max-width: 900px; 
+    height: auto;
+    margin: 80px auto;
+    border-radius: 10px;
+}
+
+span{
+    color: rgb(0, 0, 0);
+}
+
+.input_login{
+    padding-top: 50px;
+}
+
+.button-login{
+    border-radius: 12px;
+    padding: 15px;
+    font-size: 18px;
+}
+/* Media query para pantallas más pequeñas */
+@media only screen and (max-width: 768px) {
+    .ContenedorPrincipal {
+        flex-direction: column; /* Cambia la dirección del flexbox a columna */
+        margin: 10px; /* Ajusta el margen para dispositivos más pequeños */
+    }
+}

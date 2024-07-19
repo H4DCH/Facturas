@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import * as ApiFunciones from "../Data/useData";
-import * as funciones from "../Data/useUsuario";
 import ItemsLista from "./ItemsLista";
 import {
   Box,
@@ -16,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { IFactura } from "../Interface/IFactura";
 import ModalFactura from "./ModalFactura";
-import { ILogin } from "../Interface/ILogin";
+import Nav from "./Nav";
 const Lista = () => {
   const [factura, setFactura] = useState<IFactura[] | null>(null);
   const [editFactura,seteditFactura] = useState<IFactura | null>(null);
@@ -40,6 +39,7 @@ const Lista = () => {
 
   return (
     <>
+    <Nav/>
       <Box w={1000} mt={100} ml={220} display={"flex"} >
         <TableContainer>
         <>

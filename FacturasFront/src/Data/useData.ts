@@ -3,11 +3,15 @@ import { appsettings } from "../Setting/appsetting";
 
 
 export async function ObtenerFacturas() {
+try {
   const response = await fetch(`${appsettings.apiURL}factura`);
   if(response.ok){
     const datosapi = await response.json();
     return datosapi;
   }
+} catch (error) {
+  console.log(error)
+}  
 }
     
   export async function ObtenerPorId(id:number) {

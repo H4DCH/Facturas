@@ -4,6 +4,7 @@ import { IProveedor } from "../../Interface/IProveedor";
 import { Box, Button, Table, TableContainer, Tbody, Th, Thead, Tr, useDisclosure } from "@chakra-ui/react";
 import ItemProveedor from "./ItemProveedor";
 import ModalProveedor from "./ModalProveedor";
+import Nav from "../Nav";
 const ListaProveedores = () => {
 
 const[proveedores, setProveedores] = useState<IProveedor[]|null>(null);
@@ -26,6 +27,7 @@ const handleModal =(prov:IProveedor|null)=>{
     },[proveedores])
   return (
     <>
+    <Nav/>
       <Box w={550} mt={100} ml={350}>
       <TableContainer>
       <Button onClick={()=>handleModal(null)}>Nuevo Proveedor</Button>
