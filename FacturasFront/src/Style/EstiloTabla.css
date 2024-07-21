@@ -1,0 +1,28 @@
+
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Container-Tabla{
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+table{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+th{
+    background-color: gray;
+}

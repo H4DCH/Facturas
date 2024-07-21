@@ -18,7 +18,6 @@ export async function ObtenerProveedorPorId(id:number){
             const response = await fetch(`${appsettings.apiURL}proveedor/${id}`)
         if(response.ok){
             const apiResponse = await response.json();
-            console.log(apiResponse)
             return apiResponse
         }
         } catch (error) {

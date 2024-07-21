@@ -5,7 +5,6 @@ const RutasProtegidas= () => {
   const isAut = sessionStorage.getItem('token');
 
   if(!isAut) return  <Navigate to='/login' replace/>
-
   return (
     <>
     <Outlet/>

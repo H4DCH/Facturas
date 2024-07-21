@@ -4,6 +4,7 @@ using FacturasBack.Data;
 using FacturasBack.Models;
 using FacturasBack.Repository;
 using FacturasBack.Repository.IRepository;
+using FacturasBack.Utilidades;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -30,7 +31,8 @@ namespace FacturasBack
 
             builder.Services.AddScoped<IFacturaRepository,FacturaRepository>();
             builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
-            builder.Services.AddSingleton<Utilidades>();
+            builder.Services.AddSingleton<CreacionToken>();
+            builder.Services.AddSingleton<Mayusculas>();
 
             
             builder.Services.AddDbContext<Context>(options => {

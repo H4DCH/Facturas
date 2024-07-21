@@ -16,10 +16,10 @@ namespace FacturasBack.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly Context _context;
-        private readonly Utilidades _utilidades;
+        private readonly CreacionToken _utilidades;
         private readonly IMapper _mapper;
         private readonly ApiResponse apiResponse;
-        public UsuarioController(Context context,Utilidades utilidades,IMapper mapper  )
+        public UsuarioController(Context context,CreacionToken utilidades,IMapper mapper  )
         {
             _context = context;
             _utilidades = utilidades;

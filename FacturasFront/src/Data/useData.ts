@@ -4,15 +4,30 @@ import { appsettings } from "../Setting/appsetting";
 
 export async function ObtenerFacturas() {
 try {
-  const response = await fetch(`${appsettings.apiURL}factura`);
+  const token = sessionStorage.getItem('token');
+  if(!token){
+    throw new Error('No se encontro Token valido');
+  }
+  const response = await fetch(`${appsettings.apiURL}factura`,{
+    method : 'GET',
+    headers : {
+      'Authorization':`Bearer ${sessionStorage.getItem('token')}`,
+      'Content-Type' : 'application/json'
+    }
+  });
   if(response.ok){
     const datosapi = await response.json();
     return datosapi;
+  }else {
+    const datosapi = await response.json();
+    throw new Error(`Error : ${datosapi.errorMessages}`);
   }
 } catch (error) {
   console.log(error)
 }  
 }
+
+
     
   export async function ObtenerPorId(id:number) {
     const response = await fetch(`${appsettings.apiURL}factura/${id}`);

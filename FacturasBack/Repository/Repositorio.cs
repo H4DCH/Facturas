@@ -8,6 +8,7 @@ namespace FacturasBack.Repository
     public class Repositorio<T> : IRepositorio<T> where T : class
     {
         private readonly Context contextFactura;
+        
         public Repositorio(Context contextFactura)
         {
             this.contextFactura = contextFactura;

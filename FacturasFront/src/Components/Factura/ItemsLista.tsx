@@ -1,10 +1,11 @@
 import React from "react";
-import { Button, Td, Tr } from "@chakra-ui/react";
+import { Button} from "@chakra-ui/react";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
 import { FaTrashCan } from "react-icons/fa6";
-import { IFactura } from "../Interface/IFactura";
-import * as ApiFunciones from "../Data/useData";
+import { IFactura } from "../../Interface/IFactura";
+import * as ApiFunciones from "../../Data/useData";
 import Swal from "sweetalert2";
+import "../../Style/EstiloTabla.css"
 
 type propsModal ={
   factura:IFactura | null;
@@ -37,16 +38,16 @@ const ItemsLista: React.FC<propsModal> = ({factura,clickEditar}) => {
   };
   return (
     <>
-      <Tr>
-        <Td textAlign={"center"}>{factura?.numeroFactura}</Td>
-        <Td textAlign={"center"}>${factura?.precio}</Td>
-        <Td textAlign={"center"}>
+      <tr>
+        <td >{factura?.numeroFactura}</td>
+        <td >${factura?.precio}</td>
+        <td >
           {factura && factura.fechaFactura && (
             <>{new Date(factura.fechaFactura).toLocaleDateString()}</>
           )}
-        </Td>
-        <Td textAlign={"center"}>{factura?.proveedorId}</Td>
-        <Td textAlign={"center"}>
+        </td>
+        <td >{factura?.proveedor.nombreProveedor}</td>
+        <td >
           <Button m={3} onClick={()=>handleEditar()}>
             <HiOutlinePencilSquare /> Editar
           </Button>
@@ -54,8 +55,8 @@ const ItemsLista: React.FC<propsModal> = ({factura,clickEditar}) => {
             <FaTrashCan />
             Eliminar
           </Button>
-        </Td>
-      </Tr>
+        </td>
+      </tr>
     </>
   );
 };

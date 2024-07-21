@@ -13,5 +13,6 @@ namespace FacturasBack.Models.DTO
         public DateTime FechaFactura { get; set; }
         //Llave Foranea 
         public int ProveedorId { get; set; }
+        public Proveedor Proveedor { get; set; }
     }
 }

@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { IFactura } from "../Interface/IFactura";
+import { IFactura } from "../../Interface/IFactura";
 import {
   Modal,
   ModalBody,
@@ -8,11 +8,11 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/react";
-import "../Style/EstilosFormularios.css";
-import * as apiFunciones from "../Data/useData";
+import "../../Style/EstilosFormularios.css";
+import * as apiFunciones from "../../Data/useData";
 import { useEffect, useState } from "react";
-import { IProveedor } from "../Interface/IProveedor";
-import * as apiFuncionesProv from "../Data/useProveedor"
+import { IProveedor } from "../../Interface/IProveedor";
+import * as apiFuncionesProv from "../../Data/useProveedor"
 import Swal from "sweetalert2";
 
 type propsModal = {

@@ -1,6 +1,45 @@
 .nav-pricipal{
-display: flex; 
-  justify-content:left; 
-  background-color: #abf9ff; /* Color de fondo */
-  padding: 10px; 
+  position: fixed; /* Fija el navbar en la parte superior */
+  top: 0; /* Asegura que el navbar esté en la parte superior de la página */
+  left: 0; /* Alinea el navbar a la izquierda */
+  width: 100%; /* Ocupa todo el ancho disponible */
+  display: flex; /* Utiliza flexbox */
+  justify-content: space-between; /* Alinea los elementos a los extremos */
+  align-items: center; /* Centra verticalmente los elementos */
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+  z-index: 1000; /* Asegura que el navbar esté por encima del contenido */
+}
+.boton-logout{
+  background-color: #a00101;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px; 
+}
+.nav-links {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex; /* Utiliza flexbox para los enlaces */
+}
+
+.nav-links li {
+  margin-left: 20px; /* Espacio entre elementos de la lista */
+}
+
+.nav-links li:first-child {
+  margin-left: 0; /* Elimina el margen izquierdo del primer elemento */
+}
+
+.nav-links li a {
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+}
+
+.nav-links li a:hover {
+  background-color: #555;
 }

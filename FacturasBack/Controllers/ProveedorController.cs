@@ -5,6 +5,7 @@ using FacturasBack.Data;
 using FacturasBack.Models;
 using FacturasBack.Models.DTO;
 using FacturasBack.Repository.IRepository;
+using FacturasBack.Utilidades;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -19,10 +20,12 @@ namespace FacturasBack.Controllers
         private readonly IMapper _mapper;
         private readonly IProveedorRepository _proveedorRepository;
         private readonly ApiResponse response;
-        public ProveedorController(IProveedorRepository proveedorRepository, IMapper mapper)
+        private readonly Mayusculas _mayusculas;
+        public ProveedorController(IProveedorRepository proveedorRepository, IMapper mapper,Mayusculas mayusculas)
         {
             _proveedorRepository = proveedorRepository;
             _mapper = mapper;
+            _mayusculas = mayusculas;
             response = new();
         }
 
@@ -74,7 +77,7 @@ namespace FacturasBack.Controllers
                 if (proveedor == null)
                 {
                     response.EsExitoso = false;
-                    response.Resultado = HttpStatusCode.NotFound;
+                    response.StatusCode = HttpStatusCode.NotFound;
                     response.ErrorMessages = new List<string>()
                     {
                         "Proveedor no encontrado"
@@ -112,6 +115,7 @@ namespace FacturasBack.Controllers
 
                 if (verificacion == null)
                 {
+                    modeloCreacionDTO.NombreProveedor = _mayusculas.ConvertirAMayusculas(modeloCreacionDTO.NombreProveedor);
                     var modeloNuevo = _mapper.Map<Proveedor>(modeloCreacionDTO);
                     await _proveedorRepository.Crear(modeloNuevo);
 

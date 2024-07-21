@@ -19,5 +19,11 @@ namespace FacturasBack.Repository
             context.Facturas.Update(modelo);
             await Guardar();
         }
+
+        public async Task<List<Factura>> ListaFacturasProveedor()
+        {
+           var Lista = await context.Facturas.Include(p => p.Proveedor).ToListAsync();
+            return Lista;
+        }
     }
 }

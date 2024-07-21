@@ -7,11 +7,11 @@ using System.Text;
 
 namespace FacturasBack.Customs
 {
-    public class Utilidades
+    public class CreacionToken
     {
         private readonly IConfiguration _configuration; 
         // se hace para traer la informacion del appsettings, donde esta el JWT
-        public Utilidades(IConfiguration configuration)
+        public CreacionToken(IConfiguration configuration)
         {
             _configuration = configuration; 
         }

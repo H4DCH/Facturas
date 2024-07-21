@@ -1,21 +1,20 @@
-import { Button, Td, Tr } from "@chakra-ui/react";
-import { FaTrashCan } from "react-icons/fa6";
+import { Button } from "@chakra-ui/react";
+import { FaRegEye, FaTrashCan } from "react-icons/fa6";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
 import { IProveedor } from "../../Interface/IProveedor";
 import Swal from "sweetalert2";
-import * as  apiFunciones from "../../Data/useProveedor"
+import * as apiFunciones from "../../Data/useProveedor";
+import { Link } from "react-router-dom";
 
 type PropsItmes = {
-  proveedor : IProveedor | null;
-  clickEditar:(prov:IProveedor|null)=>void;
-}
+  proveedor: IProveedor | null;
+  clickEditar: (prov: IProveedor | null) => void;
+};
 
-
-const ItemProveedor: React.FC<PropsItmes> = ({proveedor,clickEditar}) => {
-
-  const handleClick = ()=>{
+const ItemProveedor: React.FC<PropsItmes> = ({ proveedor, clickEditar }) => {
+  const handleClick = () => {
     clickEditar(proveedor);
-  }
+  };
 
   const handleEliminar = async (id: number) => {
     try {
@@ -42,21 +41,31 @@ const ItemProveedor: React.FC<PropsItmes> = ({proveedor,clickEditar}) => {
       console.error(error);
     }
   };
+
   return (
     <>
-        <Tr>
-          <Td textAlign={"center"}>{proveedor?.id}</Td>
-          <Td textAlign={"center"}>{proveedor?.nombreProveedor}</Td>
-          <Td textAlign={"center"}>
-            <Button onClick={handleClick}>
-              <HiOutlinePencilSquare /> Editar
-            </Button>
-            <Button ml={3} onClick={()=>proveedor && handleEliminar(proveedor.id)}>
-              <FaTrashCan />
-              Eliminar
-            </Button>
-          </Td>
-        </Tr>
+      <tr>
+        <td>{proveedor?.id}</td>
+        <td>{proveedor?.nombreProveedor}</td>
+        <td>
+          <Button onClick={handleClick}>
+            <HiOutlinePencilSquare /> Editar
+          </Button>
+          <Button
+            ml={3}
+            onClick={() => proveedor && handleEliminar(proveedor.id)}
+          >
+            <FaTrashCan />
+            Eliminar
+          </Button>
+          <Button
+            ml={3}
+          >
+            <FaRegEye />
+            <Link to={`/proveedor/${proveedor?.id}`}>Ver Facturas</Link>
+          </Button>
+        </td>
+      </tr>
     </>
   );
 };

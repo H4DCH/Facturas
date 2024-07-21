@@ -1,8 +1,9 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import  Login  from './Pages/Login'
-import Lista from './Components/Lista';
+import Lista from './Components/Factura/Lista';
 import  ListaProveedores  from './Components/Proveedor/ListaProveedores';
 import RutasProtegidas from './RutasProtegidas';
+import FacturasdeProveedor from './Components/Proveedor/FacturasdeProveedor';
 
 function App() {
   return (
@@ -14,8 +15,11 @@ function App() {
 
           <Route element={<RutasProtegidas />}>
             <Route path="/facturas" element={<Lista />} />
-            <Route path="/proveedores" element={<ListaProveedores />} />
+            <Route path="/proveedores" element={<ListaProveedores/>} />
+            <Route path='/proveedor/:id' element={<FacturasdeProveedor/>}/>
           </Route>
+
+          <Route path='*' element={<Navigate to="/" />}/>
         </Routes>
       </BrowserRouter>
     </>

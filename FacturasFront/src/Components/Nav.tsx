@@ -1,11 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../Style/EstiloNav.css";
 
+
+
 const Nav = () => {
+const navigate = useNavigate();
+  const cerrarSession =()=>{
+    sessionStorage.removeItem('token');
+    navigate('/login')
+  }
   return (
     <>
       <nav className="nav-pricipal">
-        <div>
           <ul>
             <li>
               <Link to="/facturas">Facturas</Link>
@@ -14,7 +20,7 @@ const Nav = () => {
               <Link to="/proveedores">Proveedores</Link>
             </li>
           </ul>
-        </div>
+          <button className="boton-logout" onClick={cerrarSession}>Cerrar Sesión</button>
       </nav>
     </>
   );

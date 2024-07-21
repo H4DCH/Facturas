@@ -30,11 +30,12 @@ namespace FacturasBack.Controllers
         [HttpGet(Name = "ListaFacturas")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(AuthenticationSchemes =JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<ApiResponse>> ListaFacturas()
         {
             try
             {
-                List<Factura> listaFacturas = await _facturaRepository.ObtenerTodos();
+                List<Factura> listaFacturas = await _facturaRepository.ListaFacturasProveedor();
                 response.Resultado = _mapper.Map<List<FacturaDTO>>(listaFacturas);
                 response.StatusCode = HttpStatusCode.OK;
                 return Ok(response);
