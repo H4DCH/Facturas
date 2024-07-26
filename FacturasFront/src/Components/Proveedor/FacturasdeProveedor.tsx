@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom"
 import * as apiPorveedor from "../../Data/useProveedor";
 import { IFactura } from "../../Interface/IFactura";
+import Nav from "../Nav";
+import { Button } from "@chakra-ui/react";
 const FacturasdeProveedor = () => {
 
   let idNumber:number;
@@ -19,13 +21,31 @@ const FacturasdeProveedor = () => {
       })
    },[])
    
+   const clickExportar=(id:number)=>{
+      apiPorveedor.GenerarExcel(id);
+   }
   return (
     <>
-    <ul>
-      {facturas?.map((factura)=>(
-        <li>{factura.numeroFactura}</li>
-      ))}
-    </ul>
+    <Nav/>
+    <Button bg="green.500" onClick={()=>{clickExportar(idNumber)}}>Exportar a excel</Button>
+    <table>
+      <thead>
+        <tr>
+        <th>Numero de Factura</th>
+        <th>Valor Factura</th>
+        <th>Fecha Factura</th>
+        </tr>
+      </thead>
+      <tbody>
+        {facturas?.map((factura)=>(
+          <tr key={factura.id} >
+            <td>{factura.numeroFactura}</td>
+            <td>{factura.precio}</td>
+            <td>{factura.fechaFactura}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
     </>
   )
 }

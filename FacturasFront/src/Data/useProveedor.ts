@@ -18,12 +18,46 @@ export async function ObtenerProveedorPorId(id:number){
             const response = await fetch(`${appsettings.apiURL}proveedor/${id}`)
         if(response.ok){
             const apiResponse = await response.json();
-            return apiResponse
+            return apiResponse;
         }
         } catch (error) {
          console.error(error)   
         }
     }
+
+  export async function GenerarExcel(id:number){
+
+    try {
+      const response = await fetch(`${appsettings.apiURL}proveedor/Exportar?idProveedor=${id}`)
+      if(response.ok){
+        const apiResponse = await response.blob();
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let fileName = 'Facturas.xlsx';
+    
+        if (contentDisposition) {
+          const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=(['"]?)([^'"\n]*)\1/);
+          if (fileNameMatch && fileNameMatch[2]) {
+            fileName = fileNameMatch[2];
+          }
+        }
+        
+        const url = URL.createObjectURL(apiResponse);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      
+    }
+
+  }
 
     
   export async function ActualizarProveedor(id: number,proveedor:IProveedor) {

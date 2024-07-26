@@ -1,4 +1,5 @@
-﻿using FacturasBack.Data;
+﻿using AutoMapper;
+using FacturasBack.Data;
 using FacturasBack.Models;
 using FacturasBack.Models.DTO;
 using FacturasBack.Repository.IRepository;
@@ -8,10 +9,12 @@ namespace FacturasBack.Repository
 {
     public class FacturaRepository : Repositorio<Factura>, IFacturaRepository
     {
+        private readonly IMapper _mapper;
         private readonly Context context;
-        public FacturaRepository(Context context) : base(context)
+        public FacturaRepository(Context context,IMapper mapper) : base(context)
         {
             this.context = context;
+            _mapper = mapper;
         }
 
         public async Task Actualizar(Factura modelo)
@@ -20,10 +23,13 @@ namespace FacturasBack.Repository
             await Guardar();
         }
 
-        public async Task<List<Factura>> ListaFacturasProveedor()
+        public async Task<List<FacturaDTO>> ListaFacturasProveedor()
         {
            var Lista = await context.Facturas.Include(p => p.Proveedor).ToListAsync();
-            return Lista;
+
+            var listaMap = _mapper.Map<List<FacturaDTO>>(Lista);  
+
+            return listaMap;
         }
     }
 }

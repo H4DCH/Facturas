@@ -1,4 +1,5 @@
-﻿using FacturasBack.Data;
+﻿using AutoMapper;
+using FacturasBack.Data;
 using FacturasBack.Models;
 using FacturasBack.Models.DTO;
 using Microsoft.EntityFrameworkCore;
@@ -9,15 +10,25 @@ namespace FacturasBack.Repository.IRepository
     public class ProveedorRepository : Repositorio<Proveedor>, IProveedorRepository
     {
         private readonly Context context;
-        public ProveedorRepository(Context context) : base(context)
+        private readonly IMapper _mapper;
+        public ProveedorRepository(Context context, IMapper mapper) : base(context)
         {
             this.context = context;
+            _mapper = mapper;
         }
 
         public async Task Actualizar(Proveedor modelo)
         {         
             context.Proveedores.Update(modelo);
             await Guardar();
+        }
+
+        public async Task<List<FacturaDTO>> ListaFacturasxId(int id)
+        {
+            var lista = await context.Facturas.Include(p => p.Proveedor).Where(p => p.ProveedorId == id).ToListAsync();
+            var listaDTO =  _mapper.Map<List<FacturaDTO>>(lista);
+
+            return listaDTO;
         }
 
         public async Task<Proveedor> ListaFacturasProveedor(int id)
