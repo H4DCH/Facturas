@@ -8,5 +8,7 @@ namespace FacturasBack.Repository.IRepository
     {
         Task Actualizar( Factura modelo);
         Task<List<FacturaDTO>> ListaFacturasProveedor();
+        Task<List<FacturaExportarDTO>> ListaFacturasxId(int id);
+        Task<Byte[]> GenerarExcel(string nombreArchivo, List<FacturaExportarDTO> datos);
     }
 }

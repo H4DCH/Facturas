@@ -31,6 +31,7 @@ namespace FacturasBack
 
             builder.Services.AddScoped<IFacturaRepository,FacturaRepository>();
             builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
+            builder.Services.AddScoped<IUsuarioRepositorio,UsuarioRepository>();
             builder.Services.AddSingleton<CreacionToken>();
             builder.Services.AddSingleton<Mayusculas>();
 
@@ -43,7 +44,7 @@ namespace FacturasBack
             {
                 options.AddPolicy("NuevaPolitica",app =>
                 {
-                    app.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                    app.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().WithHeaders("content-disposition");
                 });
             });
             builder.Services.AddAuthentication(config =>

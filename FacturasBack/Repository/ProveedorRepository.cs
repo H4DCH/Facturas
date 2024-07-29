@@ -23,14 +23,6 @@ namespace FacturasBack.Repository.IRepository
             await Guardar();
         }
 
-        public async Task<List<FacturaDTO>> ListaFacturasxId(int id)
-        {
-            var lista = await context.Facturas.Include(p => p.Proveedor).Where(p => p.ProveedorId == id).ToListAsync();
-            var listaDTO =  _mapper.Map<List<FacturaDTO>>(lista);
-
-            return listaDTO;
-        }
-
         public async Task<Proveedor> ListaFacturasProveedor(int id)
         {
             var Proveedor = await context.Proveedores.Include(f => f.facturas).FirstOrDefaultAsync(p => p.Id == id);

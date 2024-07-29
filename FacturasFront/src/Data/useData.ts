@@ -28,6 +28,34 @@ try {
 }
 
 
+
+export async function GenerarExcel(){
+
+  try {
+
+    const response = await fetch(`${appsettings.apiURL}factura/Exportar`)
+    if(response.ok){
+      const apiResponse = await response.blob();
+
+      let fileName = 'Facturas.xlsx';
+
+      const url = URL.createObjectURL(apiResponse);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(url);
+    }
+  } catch (error) {
+    alert(error);
+  }
+
+}
     
   export async function ObtenerPorId(id:number) {
     const response = await fetch(`${appsettings.apiURL}factura/${id}`);

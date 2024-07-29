@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Data;
+using System.Linq.Expressions;
 
 namespace FacturasBack.Repository.IRepository
 {

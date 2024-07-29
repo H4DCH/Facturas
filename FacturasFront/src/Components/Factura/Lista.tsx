@@ -16,6 +16,10 @@ const Lista = () => {
     onOpen();
   };
 
+  const handleGenerarExcel = ()=>{
+    ApiFunciones.GenerarExcel();
+  }
+
   useEffect(() => {
     const obtenerFacturas = async () => {
       try {
@@ -33,6 +37,7 @@ const Lista = () => {
       <Nav />
       <div className="Container-Tabla">
         <Button onClick={() => handleModal(null)}>Nueva Factura</Button>
+        <Button bg={'green.500'} ml={5} onClick={()=> handleGenerarExcel()}>Generar Excel</Button>
         <table>
           <thead>
             <tr>

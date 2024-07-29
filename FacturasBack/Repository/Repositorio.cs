@@ -1,7 +1,11 @@
-﻿using FacturasBack.Data;
+﻿using ClosedXML.Excel;
+using FacturasBack.Data;
 using FacturasBack.Repository.IRepository;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace FacturasBack.Repository
 {
@@ -57,6 +61,7 @@ namespace FacturasBack.Repository
         {
             return await EntitySet.AsNoTracking().FirstOrDefaultAsync(expr);
         }
+
     }
     
 }

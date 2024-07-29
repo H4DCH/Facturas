@@ -3,6 +3,8 @@ using FacturasBack.Customs;
 using FacturasBack.Data;
 using FacturasBack.Models;
 using FacturasBack.Models.DTO;
+using FacturasBack.Repository;
+using FacturasBack.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;   
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,21 +21,37 @@ namespace FacturasBack.Controllers
         private readonly CreacionToken _utilidades;
         private readonly IMapper _mapper;
         private readonly ApiResponse apiResponse;
-        public UsuarioController(Context context,CreacionToken utilidades,IMapper mapper  )
+        private readonly IUsuarioRepositorio _usuarioRepository;
+        public UsuarioController(Context context,CreacionToken utilidades,IMapper mapper, IUsuarioRepositorio usuarioRepository)
         {
             _context = context;
             _utilidades = utilidades;
             _mapper = mapper;
+            _usuarioRepository = usuarioRepository;
             apiResponse = new();
         }
 
-        [HttpPost("Registro")]   
-        public async Task<ActionResult<ApiResponse>> Registrarse(UsuarioDTO modeloDTO)
+        [HttpPost("RegistroUsuario")]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<ActionResult<ApiResponse>> RegistroUsuario([FromBody]UsuarioDTO modeloDTO)
         {
             try
             {
-                var verificorreo = _context.Usuarios.FirstOrDefaultAsync(c => c.Correo == modeloDTO.Correo);
-                if (verificorreo != null)
+                if(modeloDTO == null)
+                {
+                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    apiResponse.EsExitoso = false;
+                    apiResponse.ErrorMessages = new List<string>
+                    {
+                        "Todos los datos son obligatorios"
+                    };
+                    return apiResponse;
+                }
+
+                var verificorreo = await _context.Usuarios.FirstOrDefaultAsync(c => c.Correo == modeloDTO.Correo);
+
+                if (verificorreo !=null)
                 {
                     apiResponse.StatusCode = HttpStatusCode.BadRequest;
                     apiResponse.EsExitoso = false;
@@ -45,38 +63,45 @@ namespace FacturasBack.Controllers
                 }
 
                 var modelo = _mapper.Map<Usuario>(modeloDTO);
-                modelo.Clave = _utilidades.EncriptarSHA256(modelo.Clave!);
-                await _context.Usuarios.AddAsync(modelo);
-                await _context.SaveChangesAsync();
+                var usuarioNuevo = await _usuarioRepository.CrearUsuario(modelo);
 
-                if (modelo.Id != 0)
-                {
-                    apiResponse.StatusCode = HttpStatusCode.OK;
-                    apiResponse.Resultado = modelo;
-                    return apiResponse;
-                }
+                apiResponse.StatusCode = HttpStatusCode.OK;
+                apiResponse.Resultado = usuarioNuevo;
+
+                return CreatedAtAction("RegistroUsuario",apiResponse);
+
             }
             catch (Exception ex)
             {
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
                 apiResponse.EsExitoso = false;
                 apiResponse.ErrorMessages = new List<string>
-                {
+                {   
                     ex.ToString()
                 };
-            }
 
-            return apiResponse;
+                return apiResponse;
+            }     
 
         }
 
-        [HttpPost("Login")]
-        public async Task<ActionResult<ApiResponse>> Login(LoginDTO modelo)
+        [HttpPost("InicioSesion")]
+        public async Task<ActionResult<ApiResponse>> InicioSesion([FromBody]LoginDTO modelo)
         {
             try
             {
-                var usuario = await _context.Usuarios.
-             Where(m => m.Correo == modelo.Correo && m.Clave == _utilidades.EncriptarSHA256(modelo.Clave)).FirstOrDefaultAsync();
+                if(modelo == null)
+                {
+                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    apiResponse.EsExitoso = false;
+                    apiResponse.ErrorMessages = new List<string>
+                    {
+                        "Se debe ingresar correo y contraseña"
+                    };
 
+                }
+                var usuario = await _context.Usuarios.
+                Where(m => m.Correo == modelo.Correo && m.Clave == _utilidades.EncriptarSHA256(modelo.Clave)).FirstOrDefaultAsync();
                 if (usuario == null)
                 {
                     apiResponse.StatusCode = HttpStatusCode.NotFound;
@@ -87,14 +112,19 @@ namespace FacturasBack.Controllers
                 };
                     return apiResponse;
                 }
-                var token = _utilidades.GenerarJWT(usuario);
+
+                var modeloDTO = _mapper.Map<Usuario>(modelo);
+
+                var usuarioIniciado = _usuarioRepository.InicioSesion(modeloDTO);
+
                 apiResponse.StatusCode = HttpStatusCode.OK;
-                apiResponse.Resultado = token;
+                apiResponse.Resultado = usuarioIniciado;
 
                 return apiResponse;
             }
             catch (Exception ex)
             {
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
                 apiResponse.EsExitoso = false;
                 apiResponse.ErrorMessages = new List<string>
                 {

@@ -7,6 +7,6 @@ namespace FacturasBack.Repository.IRepository
     {
         Task Actualizar(Proveedor modelo);
         Task <Proveedor> ListaFacturasProveedor(int id);
-        Task<List<FacturaDTO>> ListaFacturasxId(int id);
+
     }
 }

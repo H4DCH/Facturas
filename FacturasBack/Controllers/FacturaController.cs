@@ -27,34 +27,65 @@ namespace FacturasBack.Controllers
             response = new();
         }
 
-        [HttpGet(Name = "ListaFacturas")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> ListaFacturas()
+        public async Task<ActionResult<ApiResponse>> ObtenerFacturas()
         {
             try
             {
-                List<FacturaDTO> listaFacturas = await _facturaRepository.ListaFacturasProveedor();
+                var listaFacturas = await _facturaRepository.ObtenerTodos();
                 response.Resultado = listaFacturas;
                 response.StatusCode = HttpStatusCode.OK;
-                return Ok(response);
+                return response;
             }
             catch (Exception ex)
             {
+                response.StatusCode = HttpStatusCode.InternalServerError;
                 response.EsExitoso = false;
                 response.ErrorMessages = new List<string>()
                 {
                     ex.ToString()
                 };
+                return response;
             }
-            return response;
         }
 
-        [HttpGet("{id:int}", Name = "FacturaxId")]
+        [HttpGet("GenerarExcel")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GenerarExcel()
+        {
+            try
+            {
+                var listaFacturas = await _facturaRepository.ListaFacturasProveedor();
+                var listaDTO = _mapper.Map<List<FacturaExportarDTO>>(listaFacturas);
+
+                var datos = await _facturaRepository.GenerarExcel("Facturas", listaDTO);
+
+                return File(datos,
+                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Facturas"
+                    );
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse
+                {
+                    ErrorMessages = new List<string>{
+                        ex.ToString()
+                    },
+                    EsExitoso = false,
+                    StatusCode = HttpStatusCode.InternalServerError
+                }) ; ;
+            }
+        }
+
+        [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<ActionResult<ApiResponse>> FacturaxId(int id)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> ObtenerFacturaXId([FromRoute]int id)
         {
             try
             {
@@ -83,14 +114,16 @@ namespace FacturasBack.Controllers
                 {
                     ex.ToString()
                 };
+
+                return response;
             }
-            return response;
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<ActionResult<ApiResponse>> FacturaNueva([FromBody] FacturaCreacionDTO modeloDTO)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> CrearFactura([FromBody] FacturaCreacionDTO modeloDTO)
         {
             try
             {
@@ -120,13 +153,15 @@ namespace FacturasBack.Controllers
             }
             catch (Exception ex)
             {
+                response.StatusCode = HttpStatusCode.InternalServerError;
                 response.EsExitoso = false;
                 response.ErrorMessages = new List<string>()
                 {
                     ex.ToString()
                 };
+
+                return response;
             }
-            return response;
         }
 
 
@@ -134,7 +169,8 @@ namespace FacturasBack.Controllers
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<ActionResult<ApiResponse>> EliminarFactura(int id)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> EliminarFactura([FromRoute]int id)
         {
             try
             {
@@ -158,6 +194,7 @@ namespace FacturasBack.Controllers
             }
             catch (Exception ex)
             {
+                response.StatusCode = HttpStatusCode.InternalServerError;
                 response.EsExitoso = false;
                 response.ErrorMessages = new List<string>()
                 {
@@ -174,7 +211,8 @@ namespace FacturasBack.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<ActionResult<ApiResponse>> EditarFactura(int id, FacturaActualizacionDTO facturaDTO)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> EditarFactura([FromRoute] int id,[FromBody] FacturaActualizacionDTO facturaDTO)
         {
             try
             {   if (id != 0)
@@ -217,13 +255,15 @@ namespace FacturasBack.Controllers
 
             catch (Exception ex)
             {
+                response.StatusCode = HttpStatusCode.InternalServerError;
                 response.EsExitoso = false;
                 response.ErrorMessages = new List<string>()
                 {
                     ex.ToString()
                 };
+                return response;
             }
-            return response;
+            
         }
 
     }    

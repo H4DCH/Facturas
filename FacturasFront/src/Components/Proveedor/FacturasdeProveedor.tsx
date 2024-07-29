@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import * as apiPorveedor from "../../Data/useProveedor";
 import { IFactura } from "../../Interface/IFactura";
 import Nav from "../Nav";
@@ -11,6 +11,8 @@ const FacturasdeProveedor = () => {
    id ? idNumber = parseInt(id):console.log("error");
 
    const [facturas ,setFacturas] = useState<IFactura[]|null>(null);
+
+   const navigate  = useNavigate();
 
    useEffect(()=>{
       apiPorveedor.ObtenerProveedorPorId(idNumber)
@@ -24,12 +26,16 @@ const FacturasdeProveedor = () => {
    const clickExportar=(id:number)=>{
       apiPorveedor.GenerarExcel(id);
    }
+   const clickVolver=()=>{
+      navigate('/proveedores')
+   }
   return (
     <>
     <Nav/>
     <Button bg="green.500" onClick={()=>{clickExportar(idNumber)}}>Exportar a excel</Button>
     <table>
       <thead>
+        
         <tr>
         <th>Numero de Factura</th>
         <th>Valor Factura</th>
@@ -46,6 +52,8 @@ const FacturasdeProveedor = () => {
         ))}
       </tbody>
     </table>
+    
+    <Button  mt={2} onClick={()=>{clickVolver()}}>Volver a proveedores</Button>
     </>
   )
 }

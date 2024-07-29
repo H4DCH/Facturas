@@ -28,19 +28,13 @@ export async function ObtenerProveedorPorId(id:number){
   export async function GenerarExcel(id:number){
 
     try {
+
       const response = await fetch(`${appsettings.apiURL}proveedor/Exportar?idProveedor=${id}`)
       if(response.ok){
         const apiResponse = await response.blob();
-        const contentDisposition = response.headers.get('Content-Disposition');
+
         let fileName = 'Facturas.xlsx';
-    
-        if (contentDisposition) {
-          const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=(['"]?)([^'"\n]*)\1/);
-          if (fileNameMatch && fileNameMatch[2]) {
-            fileName = fileNameMatch[2];
-          }
-        }
-        
+
         const url = URL.createObjectURL(apiResponse);
 
         const a = document.createElement('a');
@@ -54,12 +48,12 @@ export async function ObtenerProveedorPorId(id:number){
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      
+      alert(error);
     }
 
   }
 
-    
+
   export async function ActualizarProveedor(id: number,proveedor:IProveedor) {
     try {
      

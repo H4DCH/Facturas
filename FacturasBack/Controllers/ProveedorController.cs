@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Data;
 using System.Net;
+using System.Reflection;
 
 namespace FacturasBack.Controllers
 {
@@ -39,7 +40,8 @@ namespace FacturasBack.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse>> ListaProveedor()
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> ObtenerProveedores()
         {
             try
             {
@@ -61,13 +63,14 @@ namespace FacturasBack.Controllers
             }
             catch (Exception ex)
             {
+                response.StatusCode = HttpStatusCode.InternalServerError;
                 response.EsExitoso = false;
                 response.ErrorMessages = new List<string>()
                 {
                     ex.ToString()
                 };
+                return response;
             }
-            return response;
 
         }
 
@@ -75,7 +78,8 @@ namespace FacturasBack.Controllers
         [HttpGet("{id:int}", Name = "ProveedorxId")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse>> ProveedorxId(int id)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> ObtenerProveedorXId([FromRoute]int id)
         {
             try
             {
@@ -99,21 +103,23 @@ namespace FacturasBack.Controllers
             }
             catch (Exception ex)
             {
+                response.StatusCode = HttpStatusCode.InternalServerError;
                 response.EsExitoso = false;
                 response.ErrorMessages = new List<string>()
                 {
                     ex.ToString()
                 };
 
+                return response;
             }
-            return response;
         }
 
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<ActionResult<ApiResponse>> ProveedorNuevo(ProveedorCreacionDTO modeloCreacionDTO)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> CrearProveedor([FromBody]ProveedorCreacionDTO modeloCreacionDTO)
         {
             try
             {
@@ -143,20 +149,23 @@ namespace FacturasBack.Controllers
             }
             catch (Exception ex)
             {
+                response.StatusCode = HttpStatusCode.InternalServerError;
                 response.EsExitoso = false;
                 response.ErrorMessages = new List<string>()
                 {
                     ex.ToString()
                 };
+
+                return response;
             }
-            return response;
         }
 
 
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse>> EliminarProveedor(int id)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> EliminarProveedor([FromRoute]int id)
         {
             try
             {
@@ -179,13 +188,15 @@ namespace FacturasBack.Controllers
             }
             catch (Exception ex)
             {
+                response.StatusCode = HttpStatusCode.InternalServerError;
                 response.EsExitoso = false;
                 response.ErrorMessages = new List<string>()
                 {
                     ex.ToString()
                 };
+
+                return response;
             }
-            return response;
         }
 
 
@@ -196,7 +207,8 @@ namespace FacturasBack.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<ActionResult<ApiResponse>> ActualizarProveedor(int id, ProveedorActualizacionDTO proveedorDTO)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> EditarProveedor([FromRoute]int id,[FromBody] ProveedorActualizacionDTO proveedorDTO)
         {
             try
             {
@@ -235,59 +247,72 @@ namespace FacturasBack.Controllers
             }
             catch (Exception ex)
             {
+                response.StatusCode = HttpStatusCode.InternalServerError;
                 response.EsExitoso = false;
                 response.ErrorMessages = new List<string>()
                 {
                     ex.ToString()
                 };
-            }
-            return response;
 
-        }
-        [HttpGet("Exportar")]
-        public async Task<FileResult> Exportar(int idProveedor)
-        {
-            var lista = await _proveedorRepository.ListaFacturasxId(idProveedor);
-            var nombreProveedor = _proveedorRepository?.ObtenerxId(idProveedor);
-
-            var nombre = $"Facturas {nombreProveedor?.Result.NombreProveedor}";
-            return await (GenerarExcel(nombre,lista));
-        }
-
-        private Task<FileResult> GenerarExcel(string NombreArcvhivo, List<FacturaDTO> facturas)
-        {
-            DataTable dataTable = new DataTable(NombreArcvhivo);
-
-            dataTable.Columns.AddRange(new DataColumn[]
-            {
-                new DataColumn("Nombre Proveedor"),
-                new DataColumn("Numero"),
-                new DataColumn("Precio"),
-                new DataColumn("Fecha")
-            });
-
-            foreach (var factura in facturas)
-            {
-                dataTable.Rows.Add(
-                    factura.Proveedor.NombreProveedor,
-                    factura.NumeroFactura,
-                    factura.Precio,
-                    factura.FechaFactura);
+                return response;
             }
 
-            using (XLWorkbook wb = new XLWorkbook())
+        }
+        [HttpGet("GenerarExcel")]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async  Task<IActionResult> GenerarExcel([FromQuery]int idProveedor)
+        {
+            try
             {
-                wb.Worksheets.Add(dataTable);
-                using (MemoryStream stream = new MemoryStream())
+                if (idProveedor <= 0)
                 {
-                    wb.SaveAs(stream);
-                    return Task.FromResult<FileResult>(File(stream.ToArray(),
-                        "application/vnd.openx" +
-                        "" +
-                        "mlformats-officedocument.spreadsheetml.sheet",
-                        NombreArcvhivo));
+                    return StatusCode(400, new ApiResponse
+                    {
+                        EsExitoso = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = new List<string> { $"El id {idProveedor} es invalido" }
+                    });
                 }
+                var lista = await _facturaRepository.ListaFacturasxId(idProveedor);
+
+                if (lista == null)
+                {
+                    return StatusCode(404, new ApiResponse
+                    {
+                        EsExitoso = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { $"Las facturas del proveedor con id:{idProveedor} no han sido encontradas" }
+                    });
+                }
+
+                var nombreProveedor = _proveedorRepository?.ObtenerxId(idProveedor);
+
+                var nombre = $"Facturas {nombreProveedor?.Result.NombreProveedor}";
+                var datos = await _facturaRepository.GenerarExcel(nombre, lista);
+
+                return File(datos,
+                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                     nombre
+                    );
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    EsExitoso = false,
+                    ErrorMessages = new List<string>
+                    {
+                        ex.ToString()
+                    }
+                    
+                });
+                ;
+                ;
             }
         }
+
     }
+    
 }
