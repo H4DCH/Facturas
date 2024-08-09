@@ -1,24 +1,17 @@
 ﻿using AutoMapper;
-using AutoMapper.Configuration.Annotations;
-using AutoMapper.Configuration.Conventions;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
-using FacturasBack.Data;
 using FacturasBack.Models;
 using FacturasBack.Models.DTO;
 using FacturasBack.Repository.IRepository;
 using FacturasBack.Utilidades;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System.Data;
 using System.Net;
-using System.Reflection;
 
 namespace FacturasBack.Controllers
 {
     [Route("api/proveedor")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class ProveedorController : ControllerBase
     {
@@ -41,21 +34,26 @@ namespace FacturasBack.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> ObtenerProveedores()
+        [AllowAnonymous]
+        public async Task<ActionResult<ApiResponse>> ObtenerProveedores([FromQuery] PaginacionDTO paginacionDTO)
         {
             try
             {
-                List<Proveedor> proveedores = await _proveedorRepository.ObtenerTodos();
+                var proveedores = await _proveedorRepository.ObtenerTodosConPaginacion(paginacionDTO);
+                
+
                 if (proveedores == null)
                 {
                     response.EsExitoso = false;
                     response.Resultado = HttpStatusCode.NotFound;
                     response.ErrorMessages = new List<string>() {
-                        "Facturas no encontradas."
+                        "Proveedores no encontradas."
                     };
                     return response;
                 }
-                response.Resultado = _mapper.Map<List<ProveedorDTO>>(proveedores);
+
+                var listaDTO = _mapper.Map<PaginacionResponse<ProveedorDTO>>(proveedores);
+                response.Resultado = listaDTO.resultados;
                 response.StatusCode = HttpStatusCode.OK;
 
                 return response;
@@ -165,11 +163,12 @@ namespace FacturasBack.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [AllowAnonymous]
         public async Task<ActionResult<ApiResponse>> EliminarProveedor([FromRoute]int id)
         {
             try
             {
-                var verificacion = _proveedorRepository.ObtenerxId(id);
+                var verificacion = await _proveedorRepository.ObtenerxId(id);
 
                 if (verificacion != null)
                 {
@@ -215,7 +214,7 @@ namespace FacturasBack.Controllers
 
                 if (proveedorDTO != null || proveedorDTO?.Id != id)
                 {
-                    var nombreExiste = await _proveedorRepository.Verfificacion(p => p.NombreProveedor == proveedorDTO.NombreProveedor);
+                    var nombreExiste = await _proveedorRepository.Verfificacion(p => p.NombreProveedor == proveedorDTO!.NombreProveedor);
 
                     if (nombreExiste != null)
                     {
@@ -223,7 +222,7 @@ namespace FacturasBack.Controllers
                         response.StatusCode = HttpStatusCode.BadRequest;
                         response.ErrorMessages = new List<string>()
                         {
-                            $"El nombre {proveedorDTO.NombreProveedor} ya se encuntra registrado"
+                            $"El nombre {proveedorDTO!.NombreProveedor} ya se encuntra registrado"
                         };
                         return response;
                     }
@@ -234,7 +233,7 @@ namespace FacturasBack.Controllers
                     response.Resultado = modelo;
                     response.StatusCode = HttpStatusCode.Created;
 
-                    return CreatedAtRoute("ProveedorxId", new { id = proveedorDTO.Id }, response);
+                    return CreatedAtRoute("ProveedorxId", new { id = proveedorDTO!.Id }, response);
                 }
                 response.EsExitoso = false;
                 response.StatusCode = HttpStatusCode.NotFound;

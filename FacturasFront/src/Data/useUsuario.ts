@@ -3,7 +3,7 @@ import { appsettings } from "../Setting/appsetting";
 
 export async function Login(usuario:ILogin) {
     try {
-        const response = await fetch(`${appsettings.apiURL}usuario/Login`, {
+        const response = await fetch(`${appsettings.apiURL}usuario/InicioSesion`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

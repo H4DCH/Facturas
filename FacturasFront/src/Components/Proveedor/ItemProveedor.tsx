@@ -9,12 +9,18 @@ import { Link } from "react-router-dom";
 type PropsItmes = {
   proveedor: IProveedor | null;
   clickEditar: (prov: IProveedor | null) => void;
+  actualizarRefrescar:(valorRefresh:boolean)=>void;
 };
 
-const ItemProveedor: React.FC<PropsItmes> = ({ proveedor, clickEditar }) => {
+const ItemProveedor: React.FC<PropsItmes> = ({ proveedor, clickEditar,actualizarRefrescar }) => {
   const handleClick = () => {
     clickEditar(proveedor);
+
   };
+
+  const cambioRefresh=()=>{
+    actualizarRefrescar(true);
+  }
 
   const handleEliminar = async (id: number) => {
     try {
@@ -23,12 +29,13 @@ const ItemProveedor: React.FC<PropsItmes> = ({ proveedor, clickEditar }) => {
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Eliminar",
-      }).then((result) => {
+      }).then(async (result) => {
         if (result.isConfirmed) {
-          apiFunciones.EliminarProveedor(id).then((response) => {
-            if (response.esExitoso)
+          await apiFunciones.EliminarProveedor(id).then((response) => {
+            if (response.esExitoso){
               Swal.fire("Eliminado Correctamente", "", "success");
-            else {
+              cambioRefresh();
+            } else {
               Swal.fire({
                 title: response.errorMessages,
                 icon: "error",

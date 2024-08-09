@@ -14,6 +14,8 @@ namespace FacturasBack.AutoMapper
             CreateMap<Factura, FacturaActualizacionDTO>().ReverseMap();
             CreateMap<Factura, FacturaExportarDTO>().ReverseMap();
             CreateMap<FacturaDTO, FacturaExportarDTO>().ReverseMap();
+            CreateMap<PaginacionResponse<Factura>, PaginacionResponse<FacturaDTO>>()
+           .ForMember(dest => dest.resultados, opt => opt.MapFrom(src => src.resultados));
 
             #endregion
 
@@ -22,6 +24,8 @@ namespace FacturasBack.AutoMapper
             CreateMap<Proveedor, ProveedorActualizacionDTO>().ReverseMap();
             CreateMap<Proveedor, ProveedorCreacionDTO>().ReverseMap();
             CreateMap<Proveedor, ProveedorExportarDTO>().ReverseMap();
+            CreateMap<PaginacionResponse<Proveedor>, PaginacionResponse<ProveedorDTO>>()
+            .ForMember(dest => dest.resultados, opt => opt.MapFrom(src => src.resultados));
             #endregion
 
             #region Usuario

@@ -1,10 +1,14 @@
 import { Navigate, Outlet } from "react-router-dom";
 
-const RutasProtegidas= () => {
-    
-  const isAut = sessionStorage.getItem('token');
+type propsLogin = {
+  isAut : boolean,
+}
+
+const RutasProtegidas:React.FC<propsLogin>= ({isAut}) => {
+ 
 
   if(!isAut) return  <Navigate to='/login' replace/>
+
   return (
     <>
     <Outlet/>

@@ -1,41 +1,45 @@
 ﻿using AutoMapper;
-using Azure;
 using FacturasBack.Models;
 using FacturasBack.Models.DTO;
 using FacturasBack.Repository.IRepository;
+using FacturasBack.Utilidades;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 
 namespace FacturasBack.Controllers
 {
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/factura")]
     [ApiController]
     public class FacturaController : ControllerBase
     {
-
         private readonly IFacturaRepository _facturaRepository;
         private readonly IMapper _mapper;
         private readonly ApiResponse response;
-        public FacturaController(IFacturaRepository _facturaRepository, IMapper mapper)
+        private readonly VerificacionFecha _verificacionFecha;
+        public FacturaController(IFacturaRepository _facturaRepository, IMapper mapper, VerificacionFecha verificacionFecha)
         {
             this._facturaRepository = _facturaRepository;
             _mapper = mapper;
+            _verificacionFecha = verificacionFecha;
             response = new();
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> ObtenerFacturas()
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse>> ObtenerFacturas([FromQuery] PaginacionDTO paginacionDTO)
         {
             try
-            {
-                var listaFacturas = await _facturaRepository.ObtenerTodos();
-                response.Resultado = listaFacturas;
+            {   
+                var listaFacturas = await _facturaRepository.ObtenerTodosConPaginacion(paginacionDTO,p=>p.Proveedor);
+                var listaDTO = _mapper.Map<PaginacionResponse<FacturaDTO>>(listaFacturas);
+                response.Resultado = listaDTO.resultados;
                 response.StatusCode = HttpStatusCode.OK;
                 return response;
             }
@@ -47,7 +51,7 @@ namespace FacturasBack.Controllers
                 {
                     ex.ToString()
                 };
-                return response;
+                return  response;
             }
         }
 
@@ -81,7 +85,7 @@ namespace FacturasBack.Controllers
             }
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}",Name ="ObtenerFacturaxId")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -115,7 +119,7 @@ namespace FacturasBack.Controllers
                     ex.ToString()
                 };
 
-                return response;
+                return StatusCode(500,response);
             }
         }
 
@@ -131,25 +135,37 @@ namespace FacturasBack.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                var verificacion = await _facturaRepository.Verfificacion(f => f.NumeroFactura == modeloDTO.NumeroFactura);
+                
+                bool verFecha = _verificacionFecha.fechaValida(modeloDTO.FechaFactura);
 
-                if (verificacion == null)
+                if (!verFecha)
                 {
+                    response.EsExitoso = false;
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMessages = new List<string>()
+                    {
+                        $"La fecha {modeloDTO.FechaFactura} es invalida"
+                    };
+                    return response;
+                }
+                     var verificacion = await _facturaRepository.Verfificacion(f => f.NumeroFactura == modeloDTO.NumeroFactura);
+                 if (verificacion == null)
+                    {
                     var modelonew = _mapper.Map<Factura>(modeloDTO);
 
                     await _facturaRepository.Crear(modelonew);
                     response.Resultado = modeloDTO;
                     response.StatusCode = HttpStatusCode.Created;
-                    return CreatedAtRoute("FacturaxId", new { id = modelonew.Id }, response);
-                }
-                else
+                    return CreatedAtRoute("ObtenerFacturaxId", new { id = modelonew.Id }, response);
+                    }
+
                     response.EsExitoso = false;
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.ErrorMessages = new List<string>()
-                    {
-                        "La factura ya existe"
-                    };
-                return BadRequest(response);
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMessages = new List<string>()
+                        {
+                            $"La factura ya existe"
+                        };
+                    return response;
             }
             catch (Exception ex)
             {
@@ -184,12 +200,12 @@ namespace FacturasBack.Controllers
                     {
                         $"Factura con Id: {id} no encontrado"
                     };
-                    return NotFound(response);
+                    return response;
                 }
 
                 await _facturaRepository.Eliminar(verificacion.Id);
                 response.StatusCode = HttpStatusCode.NoContent;
-                return Ok(response);
+                return response;
 
             }
             catch (Exception ex)
@@ -221,27 +237,45 @@ namespace FacturasBack.Controllers
                     {
                         response.EsExitoso = false;
                         response.StatusCode = HttpStatusCode.BadRequest;
-                        return BadRequest(response);
+                        response.ErrorMessages = new List<string>
+                        {
+                            "Factura Invalida"
+                        };
+                        return response;
                     }
                     var existefactura = await _facturaRepository.Verfificacion(f => f.Id == id);
+                    bool verFecha = _verificacionFecha.fechaValida(facturaDTO.FechaFactura);
 
-                    if (existefactura == null)
+                    if (verFecha)
                     {
+                        if (existefactura != null)
+                        {
+                            var facturaActu = _mapper.Map<Factura>(facturaDTO);
+                            await _facturaRepository.Actualizar(facturaActu);
+
+                            response.Resultado = facturaActu;
+                            response.StatusCode = HttpStatusCode.Created;
+                            response.Resultado = facturaActu;
+                            return  response;
+                        }
+
                         response.EsExitoso = false;
                         response.StatusCode = HttpStatusCode.NotFound;
                         response.ErrorMessages = new List<string>()
                         {
-                            $"Factura no encontrada con id: {id} no encontrada"
-                        };
-                        return NotFound(response);
+                           $"Factura no encontrada con id: {id} no encontrada"
+                            };
+                        return response;
                     }
-                    var facturaActu = _mapper.Map<Factura>(facturaDTO);
-                    await _facturaRepository.Actualizar(facturaActu);
 
-                    response.Resultado = facturaActu;
-                    response.StatusCode = HttpStatusCode.Created;
+                    response.EsExitoso = false;
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMessages = new List<string>()
+                        {
+                           $"La fecha debe ser igual o anterior a la fecha actual"
+                            };
+                    return response;
 
-                    return CreatedAtRoute("FacturaxId", new { id = facturaDTO.Id }, response);
                 }
 
                 response.EsExitoso = false;
@@ -250,9 +284,8 @@ namespace FacturasBack.Controllers
                 {
                     $"Id invalido"
                 };
-                return BadRequest(response);
+                return response;
             }
-
             catch (Exception ex)
             {
                 response.StatusCode = HttpStatusCode.InternalServerError;

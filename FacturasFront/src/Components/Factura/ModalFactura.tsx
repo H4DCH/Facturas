@@ -9,25 +9,33 @@ import {
   ModalOverlay,
 } from "@chakra-ui/react";
 import "../../Style/EstilosFormularios.css";
-import * as apiFunciones from "../../Data/useData";
+import * as apiFunciones from "../../Data/useFactura";
 import { useEffect, useState } from "react";
 import { IProveedor } from "../../Interface/IProveedor";
-import * as apiFuncionesProv from "../../Data/useProveedor"
+import * as apiFuncionesProv from "../../Data/useProveedor";
 import Swal from "sweetalert2";
+import { format } from "@formkit/tempo";
 
 type propsModal = {
   factura: IFactura | null;
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
+  actualizarRefrescar:(valorRefresh:boolean)=>void;
 };
 
-const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
+let fechaFormateda:string;
 
-  const fechaFormateda = factura?.fechaFactura
-    ? new Date(factura.fechaFactura).toISOString().substr(0, 10)
-    : undefined;
+const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose,actualizarRefrescar}) => {
+  if(factura!=null){
+    const dateString:string = factura.fechaFactura.toString();
+     fechaFormateda = format(dateString,"YYYY-MM-DD");
+  }
+  else fechaFormateda = "";
 
+const cambioRefresh =()=>{
+  actualizarRefrescar(true)
+}
   const {
     register,
     handleSubmit,
@@ -35,50 +43,70 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
     formState: { errors },
   } = useForm<IFactura>();
 
-
   const onSubmit = handleSubmit(async (data) => {
     try {
       if (data && data.id) {
-        await apiFunciones.ActualizarFactura(data.id, data);
+        const resp = await apiFunciones.ActualizarFactura(data.id, data);
+        if (resp.esExitoso) {
+          Swal.fire({
+            title: "Factura Actualizada",
+            icon: "success",
+          });
+          reset();
+          onClose();
+          cambioRefresh();
+        } else {
+          Swal.fire({
+            title: "Error al actualizar",
+            text: `${resp.errorMessages}`,
+            icon: "error",
+          });
+          reset();
+          onClose();
+        }
+      } else {
+        const resp = await apiFunciones.CrearFactura(data);
+        console.log(resp);
+        if(resp.esExitoso){
         Swal.fire({
-          title: "Factura Actualizada",
-          icon: "success"
+          title: "Factura Creada",
+          icon: "success",
         });
         reset();
         onClose();
-      }
-      else {
-        await apiFunciones.CrearFactura(data)
-        Swal.fire({
-          title: "Factura Creada",
-          icon: "success"
-        });
-        reset();
-        onClose()
+        cambioRefresh();
+        }else {
+          Swal.fire({
+            title: "Error al crear",
+            text: `${resp.errorMessages}`,
+            icon: "error",
+          });
+          reset();
+          onClose();
+        }
       }
     } catch (error) {
       console.log("Error con el proceso:", error);
     }
   });
 
-  const handleClose =()=>{
+  const handleClose = () => {
     reset();
     onClose();
-  }
+  };
 
- const [proveedores , setProveedor] = useState<IProveedor[]>();
+  const [proveedores, setProveedor] = useState<IProveedor[]>();
 
-  useEffect(()=>{
-    apiFuncionesProv.ListaProveedores()
-    .then((resp)=>{
-      setProveedor(resp.resultado)
-    })
-  },[])
+  useEffect(() => {
+    apiFuncionesProv.ListaProveedores().then((resp) => {
+      setProveedor(resp.resultado);
+    });
+  }, []);
 
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
+        <ModalOverlay zIndex={100} />
         <ModalContent>
           <ModalHeader>
             {factura?.numeroFactura ? (
@@ -89,10 +117,15 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
           </ModalHeader>
           <ModalBody>
             <form onSubmit={onSubmit}>
-              <input defaultValue={factura?.id} type="hidden" {...register("id")} />
+              <input
+                defaultValue={factura?.id}
+                type="hidden"
+                {...register("id")}
+              />
               <label>
                 Número de factura
-                <input defaultValue={factura?.numeroFactura}
+                <input
+                  defaultValue={factura?.numeroFactura}
                   {...register("numeroFactura", {
                     required: {
                       value: true,
@@ -115,7 +148,8 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
 
               <label>
                 Precio de factura
-                <input defaultValue={factura?.precio}
+                <input
+                  defaultValue={factura?.precio}
                   {...register("precio", {
                     required: {
                       value: true,
@@ -136,7 +170,8 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
 
               <label>
                 Fecha de Factura
-                <input defaultValue={fechaFormateda}
+                <input
+                  defaultValue={fechaFormateda}
                   {...register("fechaFactura", {
                     required: {
                       value: true,
@@ -161,10 +196,15 @@ const ModalFactura: React.FC<propsModal> = ({ factura, isOpen, onClose }) => {
               </label>
               <label>
                 Proveedor
-                <select {...register("proveedorId") } defaultValue={factura?.proveedorId}>
-                    {proveedores?.map((prov)=>(
-                      <option key={prov.id} value={prov.id}>{prov.nombreProveedor}</option>
-                    ))}
+                <select
+                  {...register("proveedorId")}
+                  defaultValue={factura?.proveedorId}
+                >
+                  {proveedores?.map((prov) => (
+                    <option key={prov.id} value={prov.id}>
+                      {prov.nombreProveedor}
+                    </option>
+                  ))}
                 </select>
               </label>
             </form>

@@ -1,6 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-
-namespace FacturasBack.Utilidades
+﻿namespace FacturasBack.Utilidades
 {
     public  class Mayusculas
     {

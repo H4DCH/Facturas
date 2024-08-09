@@ -9,9 +9,10 @@ type propsModal = {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
+  actualizarRefrescar:(valorRefresh:boolean)=>void;
 };
 
-const ModalProveedor: React.FC<propsModal> = ({proveedor,isOpen,onClose}) => {
+const ModalProveedor: React.FC<propsModal> = ({proveedor,isOpen,onClose,actualizarRefrescar}) => {
 
     const {register,handleSubmit,reset,formState:{errors}} = useForm<IProveedor>();
 
@@ -19,12 +20,17 @@ const ModalProveedor: React.FC<propsModal> = ({proveedor,isOpen,onClose}) => {
       reset();
       onClose();
     };
+
+    const cambioRefresh =()=>{
+      actualizarRefrescar(true);
+    }
+
+
     const onSubmit = handleSubmit(async (data) => {
       try {
         if (data && data.id) {
           ApiFunciones.ActualizarProveedor(data.id, data).then(
             (apiResponse) => {
-              console.log(apiResponse)
               if (apiResponse.esExitoso) {
                 reset();
                 onClose();
@@ -32,6 +38,7 @@ const ModalProveedor: React.FC<propsModal> = ({proveedor,isOpen,onClose}) => {
                   title: "Proveedor Actualizado",
                   icon: "success",
                 });
+                cambioRefresh();
               }
               else{
                 reset()
@@ -54,6 +61,7 @@ const ModalProveedor: React.FC<propsModal> = ({proveedor,isOpen,onClose}) => {
                   title: "Proveedor Actualizado",
                   icon: "success",
                 });
+                cambioRefresh();
               }
               else{
                 reset()
@@ -70,7 +78,6 @@ const ModalProveedor: React.FC<propsModal> = ({proveedor,isOpen,onClose}) => {
         console.error(error);
       }
     });
-
 
   return (
     <>

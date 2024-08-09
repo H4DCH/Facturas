@@ -1,7 +1,6 @@
 
 using FacturasBack.Customs;
 using FacturasBack.Data;
-using FacturasBack.Models;
 using FacturasBack.Repository;
 using FacturasBack.Repository.IRepository;
 using FacturasBack.Utilidades;
@@ -32,10 +31,12 @@ namespace FacturasBack
             builder.Services.AddScoped<IFacturaRepository,FacturaRepository>();
             builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
             builder.Services.AddScoped<IUsuarioRepositorio,UsuarioRepository>();
+           
             builder.Services.AddSingleton<CreacionToken>();
             builder.Services.AddSingleton<Mayusculas>();
+            builder.Services.AddSingleton<VerificacionFecha>();
 
-            
+
             builder.Services.AddDbContext<Context>(options => {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Conexion"));
             });
@@ -44,7 +45,7 @@ namespace FacturasBack
             {
                 options.AddPolicy("NuevaPolitica",app =>
                 {
-                    app.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().WithHeaders("content-disposition");
+                    app.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
                 });
             });
             builder.Services.AddAuthentication(config =>

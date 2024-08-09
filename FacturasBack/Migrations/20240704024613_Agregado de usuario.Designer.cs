@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FacturasBack.Migrations
 {
-    [DbContext(typeof(Context))]
+    [DbContext(typeof(Data.Context))]
     [Migration("20240704024613_Agregado de usuario")]
     partial class Agregadodeusuario
     {

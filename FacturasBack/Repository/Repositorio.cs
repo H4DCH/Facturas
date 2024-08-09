@@ -1,29 +1,26 @@
-﻿using ClosedXML.Excel;
-using FacturasBack.Data;
+﻿using FacturasBack.Data;
+using FacturasBack.Models;
+using FacturasBack.Models.DTO;
 using FacturasBack.Repository.IRepository;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace FacturasBack.Repository
 {
     public class Repositorio<T> : IRepositorio<T> where T : class
     {
-        private readonly Context contextFactura;
+        private readonly Context context;
         
-        public Repositorio(Context contextFactura)
+        public Repositorio(Context context)
         {
-            this.contextFactura = contextFactura;
+            this.context = context;
         }
 
-        //Clase creada generica para no instanciar mas clases
         protected DbSet<T> EntitySet
         {
             get
             {
-                return contextFactura.Set<T>();
+                return context.Set<T>();
             }
         }
 
@@ -36,10 +33,14 @@ namespace FacturasBack.Repository
 
         public async Task Eliminar(int id)
         {
-           T entidad = await EntitySet.FindAsync(id);
-            EntitySet.Remove(entidad);
+           var entidad = await EntitySet.FindAsync(id);
+            if (entidad != null)
+            {
 
-            await Guardar();
+                EntitySet.Remove(entidad);
+                await Guardar();
+            }
+
         }
 
         public async Task<List<T>> ObtenerTodos()
@@ -54,14 +55,35 @@ namespace FacturasBack.Repository
 
         public async Task Guardar()
         {
-            await contextFactura.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
 
         public async Task<T> Verfificacion(Expression<Func<T, bool>> expr)
         {
             return await EntitySet.AsNoTracking().FirstOrDefaultAsync(expr);
-        }
+        }   
 
+        public async Task<PaginacionResponse<T>> ObtenerTodosConPaginacion(PaginacionDTO paginacionDTO,params Expression<Func<T, object>>[]includes)
+        {
+            var query =  EntitySet.AsQueryable();
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+
+            var totalResultado = await query.CountAsync();
+
+            var resultado = await query
+                .Skip((paginacionDTO.pagina - 1) * paginacionDTO.datosPorPagina)
+                .Take(paginacionDTO.datosPorPagina)
+                .ToListAsync();
+
+            return new PaginacionResponse<T>(resultado, totalResultado,paginacionDTO.pagina,paginacionDTO.datosPorPagina);
+        }
     }
     
 }

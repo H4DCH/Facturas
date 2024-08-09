@@ -3,7 +3,6 @@ using FacturasBack.Customs;
 using FacturasBack.Data;
 using FacturasBack.Models;
 using FacturasBack.Models.DTO;
-using FacturasBack.Repository;
 using FacturasBack.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;   
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +21,7 @@ namespace FacturasBack.Controllers
         private readonly IMapper _mapper;
         private readonly ApiResponse apiResponse;
         private readonly IUsuarioRepositorio _usuarioRepository;
+
         public UsuarioController(Context context,CreacionToken utilidades,IMapper mapper, IUsuarioRepositorio usuarioRepository)
         {
             _context = context;
@@ -46,7 +46,7 @@ namespace FacturasBack.Controllers
                     {
                         "Todos los datos son obligatorios"
                     };
-                    return apiResponse;
+                    return BadRequest(apiResponse);
                 }
 
                 var verificorreo = await _context.Usuarios.FirstOrDefaultAsync(c => c.Correo == modeloDTO.Correo);
@@ -59,7 +59,7 @@ namespace FacturasBack.Controllers
                 {
                  "El correo ya registrado"
                  };
-                    return apiResponse;
+                    return BadRequest(apiResponse);
                 }
 
                 var modelo = _mapper.Map<Usuario>(modeloDTO);
@@ -80,12 +80,13 @@ namespace FacturasBack.Controllers
                     ex.ToString()
                 };
 
-                return apiResponse;
+                return StatusCode(500,apiResponse);
             }     
 
         }
 
         [HttpPost("InicioSesion")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ApiResponse>> InicioSesion([FromBody]LoginDTO modelo)
         {
             try
@@ -98,6 +99,8 @@ namespace FacturasBack.Controllers
                     {
                         "Se debe ingresar correo y contraseña"
                     };
+
+                    return BadRequest(apiResponse);
 
                 }
                 var usuario = await _context.Usuarios.
@@ -114,13 +117,11 @@ namespace FacturasBack.Controllers
                 }
 
                 var modeloDTO = _mapper.Map<Usuario>(modelo);
-
-                var usuarioIniciado = _usuarioRepository.InicioSesion(modeloDTO);
-
+           
                 apiResponse.StatusCode = HttpStatusCode.OK;
-                apiResponse.Resultado = usuarioIniciado;
+                apiResponse.Resultado = _usuarioRepository.InicioSesion(modeloDTO);
 
-                return apiResponse;
+                return Ok(apiResponse);
             }
             catch (Exception ex)
             {
@@ -130,7 +131,7 @@ namespace FacturasBack.Controllers
                 {
                     ex.ToString()
                 };
-                return apiResponse;
+                return StatusCode(500,apiResponse);
             }
          
         }

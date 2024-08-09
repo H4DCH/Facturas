@@ -3,6 +3,8 @@ import "../Style/Login.css";
 import { ILogin } from "../Interface/ILogin";
 import * as funcionesLogin from "../Data/useUsuario";
 import { useNavigate } from "react-router-dom";
+import RutasProtegidas from "../RutasProtegidas";
+import { useState } from "react";
 const Login = () => {
   const {
     register,
@@ -11,15 +13,23 @@ const Login = () => {
   } = useForm<ILogin>();
   const navigate = useNavigate();
 
-  const onSubmit = handleSubmit((data) => {
-    funcionesLogin.Login(data).then((resp) => {
-      if (resp.esExitoso && resp.resultado!=null) {
-        sessionStorage.setItem("token", resp.resultado);
-        navigate("/facturas");
+  const [Aut, setAut] = useState<boolean>(false);
 
-      }else alert("Correo o contraseña invalidos")
-    });
+
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      const resp = await funcionesLogin.Login(data);
+      if (resp.esExitoso && resp.statusCode == 200) {
+        setAut(true);
+        sessionStorage.setItem("token", resp.resultado.result);
+        navigate("/facturas");
+      } else alert("Correo o contraseña invalidos");
+    } catch (error) {
+      throw new Error(`Error: ${error}`);
+    }
   });
+
   return (
     <>
       <div className="ContenedorPrincipal">
@@ -33,7 +43,7 @@ const Login = () => {
                   message: "El correo es necesario",
                 },
               })}
-              type="emial"
+              type="email"
               placeholder="ejemplo@ejemplo.com"
             />
             {errors.correo && <span>{errors.correo.message}</span>}
@@ -57,6 +67,7 @@ const Login = () => {
           </button>
         </form>
       </div>
+      <RutasProtegidas isAut={Aut} />
     </>
   );
 };

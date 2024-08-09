@@ -6,6 +6,7 @@ import RutasProtegidas from './RutasProtegidas';
 import FacturasdeProveedor from './Components/Proveedor/FacturasdeProveedor';
 
 function App() {
+  const isAut = Boolean(sessionStorage.getItem('token'))
   return (
     <>
       <BrowserRouter>
@@ -13,7 +14,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Login />} />
 
-          <Route element={<RutasProtegidas />}>
+          <Route element={<RutasProtegidas isAut={isAut}/>}>
             <Route path="/facturas" element={<Lista />} />
             <Route path="/proveedores" element={<ListaProveedores/>} />
             <Route path='/proveedor/:id' element={<FacturasdeProveedor/>}/>

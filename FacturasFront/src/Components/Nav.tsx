@@ -1,8 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import "../Style/EstiloNav.css";
 
-
-
 const Nav = () => {
 const navigate = useNavigate();
   const cerrarSession =()=>{

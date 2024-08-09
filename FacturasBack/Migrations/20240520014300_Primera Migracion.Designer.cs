@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FacturasBack.Migrations
 {
-    [DbContext(typeof(Context))]
+    [DbContext(typeof(Data.Context))]
     [Migration("20240520014300_Primera Migracion")]
     partial class PrimeraMigracion
     {

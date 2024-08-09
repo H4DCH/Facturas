@@ -86,8 +86,7 @@ namespace FacturasBack.Repository
 
         public async Task<List<FacturaDTO>> ListaFacturasProveedor()
         {
-           var Lista = await context.Facturas.Include(p => p.Proveedor).ToListAsync();
-
+           var Lista =  await context.Facturas.Include(p => p.Proveedor).ToListAsync();
             var listaMap = _mapper.Map<List<FacturaDTO>>(Lista);  
 
             return listaMap;
@@ -96,9 +95,10 @@ namespace FacturasBack.Repository
         public async Task<List<FacturaExportarDTO>> ListaFacturasxId(int id)
         {
             var lista = await context.Facturas.Include(p => p.Proveedor).Where(p => p.ProveedorId == id).ToListAsync();
-            var listaDTO = _mapper.Map<List<FacturaExportarDTO>>(lista);
 
+            var listaDTO = _mapper.Map<List<FacturaExportarDTO>>(lista);
             return listaDTO;
         }
     }
 }
+
